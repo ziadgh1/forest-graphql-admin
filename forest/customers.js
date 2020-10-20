@@ -11,7 +11,7 @@ collection('customers', {
   fields: [
     {
       field: 'id',
-      type: 'String',
+      type: 'Number',
       isGraphQL: true,
       isSortable: true,
     },{
@@ -26,7 +26,7 @@ collection('customers', {
       isGraphQL: true,
     },{
       field: 'email',
-      type: 'Number',
+      type: 'String',
       isSortable: true,
       isGraphQL: true,
     },{

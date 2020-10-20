@@ -25,7 +25,7 @@
       "validations": []
     }, {
       "field": "email",
-      "type": "Number",
+      "type": "String",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -53,7 +53,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Number",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -136,7 +136,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Number",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -428,7 +428,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Number",
       "defaultValue": null,
       "enums": null,
       "integration": null,

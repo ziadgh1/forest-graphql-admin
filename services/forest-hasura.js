@@ -1,3 +1,4 @@
+const cookieParser = require('cookie-parser');
 const { RecordSerializer } = require('forest-express-sequelize');
 const Liana = require('forest-express-sequelize');
 const { request, gql } = require('graphql-request');
@@ -15,7 +16,7 @@ const HASURA_COMPARISONS = {
   neq: '_neq',
   gt: '_gt',
   gte: '_gte',
-  "???": '_is_null',
+  isnull: '_is_null',
   lt: '_lt',
   gte: '_gte',
   gte: '_gte',
@@ -24,12 +25,31 @@ const HASURA_COMPARISONS = {
   nilike: '_nilike',
   nlike: '_nlike',
 };
+// case 'present':
+//     [_this.OPERATORS.NE]: null
+// case 'blank':
+//   return isTextField ? {
+//     [_this.OPERATORS.OR]: [{
+//       [_this.OPERATORS.EQ]: null
+//     }, {
+//       [_this.OPERATORS.EQ]: ''
+//     }]
+//   } : {
+//     [_this.OPERATORS.EQ]: null
+//   };
+
 function ForestHasura(collectionName, graphqlURL, idField) {
   const COLLECTION_NAME = collectionName;
   const GRAPHQL_URL = graphqlURL;
   const ID_FIELD = idField?idField:'id';
 
   this.list  = async function (req, res, next) {
+
+    if (req.query.context) {
+      // This is a belongsTo search
+      this.listDropdown(req,res,next);
+      return;
+    }  
     const limit = parseInt(req.query.page.size) || 10;
     const offset = (parseInt(req.query.page.number) - 1) * limit;
   
@@ -64,6 +84,35 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     .catch(next);    
   }
 
+  this.listDropdown = async function (req, res, next) {
+    let selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
+    if (selectFields !== 'id') { //TODO: id can be different
+      selectFields = ID_FIELD + ' ' + selectFields;
+    }
+
+    const whereField = `${req.query.fields[COLLECTION_NAME]}`;
+    const search = req.query.search;
+    const field = Liana.Schemas.schemas[COLLECTION_NAME].fields.filter(field => field.field === whereField)[0];
+
+    const whereCondition = getWhereCondition(field, search);
+
+    const whereGraphQL = JSON5.stringify(whereCondition, {quote: '"'});
+
+    const query = gql`
+      query getDropDown {
+        ${COLLECTION_NAME}(where: ${whereGraphQL}) {
+          ${selectFields}
+        }
+      }`;
+  
+    request(GRAPHQL_URL, query).then(async (data) => {
+      const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+      const recordsSerialized = await recordSerializer.serialize(data[COLLECTION_NAME]);
+      res.send(recordsSerialized);
+    })
+    .catch(next);    
+  }
+
   this.details  = async function (req, res, next) {
     const recordId = req.params.recordId;
     if (recordId === 'count') return; // bug?
@@ -88,6 +137,37 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     .then(recordsSerialized => res.send(recordsSerialized))
     .catch(next);
   }
+
+  this.update  = async function (req, res, next) {
+    const recordId = req.params.recordId;
+    let attributes = req.body.data.attributes;
+    const relationships = req.body.data.relationships;
+    for (const [key, value] of Object.entries(relationships)) {
+      console.log(`${key}: ${value}`);
+      const schema = Liana.Schemas.schemas[COLLECTION_NAME];
+      const foreignKey = schema.fields.filter(field => field.field === key)[0].foreignKey;
+      attributes[camelToUnderscore(foreignKey)] = value.data.id; //TODO: id field might be different for orders?
+    }
+    const setValues = JSON5.stringify(attributes, {quote: '"'});
+
+    const selectFields = getDetailsFields(COLLECTION_NAME);
+  
+    const query = gql`
+      mutation update {
+        update_${COLLECTION_NAME}_by_pk(pk_columns: {${ID_FIELD}: "${recordId}"}, _set: ${setValues}) {
+          ${selectFields}
+        }
+      }`;
+  
+    request(GRAPHQL_URL, query).then((data) => {
+      const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+      return recordSerializer.serialize(data[`update_${COLLECTION_NAME}_by_pk`]);
+    })
+    .then(recordsSerialized => res.send(recordsSerialized))
+    .catch(next);
+  
+  }
+
 }
 
 
@@ -116,22 +196,32 @@ function buildWhereConditionSearch (search, collectioName) {
 
   let whereCondition = {};
   if (search) {
-    search = '%' + search + '%';
     let wcArray = whereCondition[HASURA_OPERATORS.or] = [];
     for (let i=0;i<schema.fields.length;i++){
       const field = schema.fields[i];
-      if (field.isGraphQL && field.type === 'String') {
+      if (field.isGraphQL) {
         if (field.reference) {
           //TODO: Extended search !!
-          //wcArray.push({ [???]: { [HASURA_COMPARISONS.ilike]: search} });
+          //wcArray.push({ [???]: { [HASURA_COMPARISONS.ilike]: '%' + search + '%'} });
         }
         else {
-          wcArray.push({ [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.ilike]: search} });
+          const whereCondition = getWhereCondition(field, search);
+          if (whereCondition) wcArray.push(whereCondition);
         }
       }
     }
   };
   return JSON5.stringify(whereCondition, {quote: '"'}); // GraphQL expect " for strings and no ' or " for keys
+}
+
+function getWhereCondition(field, search) {
+  switch (field.type) {
+    case 'String':
+      return { [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.ilike]: '%' + search + '%'} };
+    case 'Number':
+      return { [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.eq]: search} };
+  }
+  return null;
 }
 
 function camelToUnderscore(key) {
@@ -171,7 +261,7 @@ function generateBelongsToFields(queryBelongsToReferenceField, belongsToCollecti
   return belongsToCollection + ' { ' + belongsToFields + ' } ';;
 }
 
-const JSON5 = require('json5')
+const JSON5 = require('json5');
 
 
 function getCollectionFields(queryFields, collectioName) {

@@ -20,6 +20,16 @@ router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.details(
   forestHasura.details(request, response, next);
 });
 
+// Update a Record
+router.put(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  forestHasura.update(request, response, next);
+});
+
+// update the relationship is not needed in the relational context
+router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  response.send({});
+});
+  
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 // Create a Order
@@ -28,11 +38,6 @@ router.post('/orders', permissionMiddlewareCreator.create(), (req, response, nex
   next();
 });
 
-// Update a Order
-router.put('/orders/:recordId', permissionMiddlewareCreator.update(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#update-a-record
-  next();
-});
 
 // Delete a Order
 router.delete('/orders/:recordId', permissionMiddlewareCreator.delete(), (req, response, next) => {

@@ -11,7 +11,7 @@ collection('deliveries', {
   fields: [
     {
       field: 'id',
-      type: 'String',
+      type: 'Number',
       isGraphQL: true,
       isSortable: true,
     },{

@@ -19,4 +19,14 @@ router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.list(), 
     forestHasura.details(request, response, next);
 });
 
+// Update a Record
+router.put(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  forestHasura.update(request, response, next);
+});
+
+// update the relationship is not needed in the relational context
+router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  response.send({});
+});
+
 module.exports = router;

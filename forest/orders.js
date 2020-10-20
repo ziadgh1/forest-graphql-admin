@@ -66,18 +66,22 @@ collection('orders', {
     field: 'product',
     type: 'String',
     reference: 'products.id',
+    foreignKey: 'product_id',
     isSortable: true,
     isGraphQL: true,
   },{
     field: 'customer',
     type: 'String',
     reference: 'customers.id',
+    foreignKey: 'customer_id',
     isSortable: true,
+
     isGraphQL: true,
   },{
     field: 'delivery',
     type: 'String',
     reference: 'deliveries.id',
+    foreignKey: 'delivery_id',
     isSortable: true,
     isGraphQL: true,
   },    
