@@ -1,10 +1,5 @@
 const express = require('express');
 const { PermissionMiddlewareCreator } = require('forest-express-sequelize');
-// TODO: is there something better?
-
-//const models = require('../models');
-const { request, gql } = require('graphql-request');
-const GRAPHQL_URL = process.env.GRAPHQL_URL;
 const COLLECTION_NAME = 'orders';
 
 const ForestHasura = require('../services/forest-hasura');
@@ -41,12 +36,6 @@ router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, 
   forestHasura.list(request, response, next);
 });
 
-// ==> Not Applicable for Smart Collection
-// // Get a number of Orders
-// router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (req, response, next) => {
-//   // next();
-// });
-
 // Get a Order
 router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.details(), (request, response, next) => {
   // next();
@@ -64,5 +53,12 @@ router.delete('/orders', permissionMiddlewareCreator.delete(), (req, response, n
   // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-list-of-records
   next();
 });
+
+
+// ==> Not Applicable for Smart Collection
+// // Get a number of Orders
+// router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (req, response, next) => {
+//   // next();
+// });
 
 module.exports = router;
