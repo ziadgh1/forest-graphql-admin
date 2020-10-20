@@ -24,9 +24,10 @@ const HASURA_COMPARISONS = {
   nilike: '_nilike',
   nlike: '_nlike',
 };
-function ForestHasura(collectionName, graphqlURL) {
+function ForestHasura(collectionName, graphqlURL, idField) {
   const COLLECTION_NAME = collectionName;
   const GRAPHQL_URL = graphqlURL;
+  const ID_FIELD = idField?idField:'id';
 
   this.list  = async function (req, res, next) {
     const limit = parseInt(req.query.page.size) || 10;
@@ -70,17 +71,17 @@ function ForestHasura(collectionName, graphqlURL) {
   
   
     const query = gql`
-      query details($ref: String!) {
-        ${COLLECTION_NAME}_by_pk(ref: $ref) {
+      query details {
+        ${COLLECTION_NAME}_by_pk(${ID_FIELD}: "${recordId}") {
           ${selectFields}
         }
       }`;
   
-    const variables = {
-      ref: recordId
-    }
+    // const variables = {
+    //   id: recordId
+    // }
   
-    request(GRAPHQL_URL, query, variables).then((data) => {
+    request(GRAPHQL_URL, query).then((data) => {
       const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
       return recordSerializer.serialize(data[`${COLLECTION_NAME}_by_pk`]);
     })
@@ -150,6 +151,7 @@ function getDetailsFields (collectioName) {
         const belongsToCollection = field.reference.split('.')[0];
         const schemaReference = Liana.Schemas.schemas[belongsToCollection];
         //TODO: We just need the ref field ... Steve => how can we do it?
+        //TODO2:  / FILTER HERE ON FIELDS without REF & isGraphQL / 
         let result = schemaReference.fields.map(field => camelToUnderscore(field.field)); // camelToUnderscore just while we implement the smart collection of the belongsTo
         detailsFields.push(field.field + ` {  ${result.join(' ')} } ` );
       }
