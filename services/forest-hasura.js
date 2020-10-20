@@ -133,6 +133,11 @@ function buildWhereConditionSearch (search, collectioName) {
   return JSON5.stringify(whereCondition, {quote: '"'}); // GraphQL expect " for strings and no ' or " for keys
 }
 
+function camelToUnderscore(key) {
+  var result = key.replace( /([A-Z])/g, " $1" );
+  return result.split(' ').join('_').toLowerCase();
+}
+
 function getDetailsFields (collectioName) {
   const schema = Liana.Schemas.schemas[collectioName];
 
@@ -142,8 +147,11 @@ function getDetailsFields (collectioName) {
     const field = schema.fields[i];
     if (field.isGraphQL) {
       if (field.reference) {
-        //TODO: ???
-        detailsFields;
+        const belongsToCollection = field.reference.split('.')[0];
+        const schemaReference = Liana.Schemas.schemas[belongsToCollection];
+        //TODO: We just need the ref field ... Steve => how can we do it?
+        let result = schemaReference.fields.map(field => camelToUnderscore(field.field)); // camelToUnderscore just while we implement the smart collection of the belongsTo
+        detailsFields.push(field.field + ` {  ${result.join(' ')} } ` );
       }
       else {
         detailsFields.push(field.field);
