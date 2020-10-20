@@ -8,60 +8,13 @@ module.exports = (sequelize, DataTypes) => {
     ref: {
       type: DataTypes.STRING,
       primaryKey: true,
-      defaultValue: Sequelize.literal('nextval(orders_id_seq::regclass)'),
-      allowNull: false,
-    },
-    shippingStatus: {
-      type: DataTypes.STRING,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
-    },
-    updatedAt: {
-      type: DataTypes.DATE,
-    },
-    beingProcessedAt: {
-      type: DataTypes.DATE,
-    },
-    readyForShippingAt: {
-      type: DataTypes.DATE,
-    },
-    inTransitAt: {
-      type: DataTypes.DATE,
-    },
-    shippedAt: {
-      type: DataTypes.DATE,
     },
   }, {
-    tableName: 'orders',
-    underscored: true,
-    schema: process.env.DATABASE_SCHEMA,
+    tableName: '',
+    timestamps: false,
+//    underscored: true,
+//    schema: process.env.DATABASE_SCHEMA,
   });
-
-  // This section contains the relationships for this model. See: https://docs.forestadmin.com/documentation/v/v6/reference-guide/relationships#adding-relationships.
-  Orders.associate = (models) => {
-    Orders.belongsTo(models.customers, {
-      foreignKey: {
-        name: 'customerIdKey',
-        field: 'customer_id',
-      },
-      as: 'customer',
-    });
-    Orders.belongsTo(models.deliveries, {
-      foreignKey: {
-        name: 'deliveryIdKey',
-        field: 'delivery_id',
-      },
-      as: 'delivery',
-    });
-    Orders.belongsTo(models.products, {
-      foreignKey: {
-        name: 'productIdKey',
-        field: 'product_id',
-      },
-      as: 'product',
-    });
-  };
 
   return Orders;
 };

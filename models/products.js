@@ -28,13 +28,13 @@ module.exports = (sequelize, DataTypes) => {
 
   // This section contains the relationships for this model. See: https://docs.forestadmin.com/documentation/v/v6/reference-guide/relationships#adding-relationships.
   Products.associate = (models) => {
-    Products.hasMany(models.orders, {
-      foreignKey: {
-        name: 'productIdKey',
-        field: 'product_id',
-      },
-      as: 'orders',
-    });
+    // Products.hasMany(models.orders, {
+    //   foreignKey: {
+    //     name: 'productIdKey',
+    //     field: 'product_id',
+    //   },
+    //   as: 'orders',
+    // });
   };
 
   return Products;
