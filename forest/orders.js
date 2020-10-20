@@ -6,14 +6,24 @@ const { collection } = require('forest-express-sequelize');
 // - Smart relationships: https://docs.forestadmin.com/documentation/reference-guide/relationships/create-a-smart-relationship
 // - Smart segments: https://docs.forestadmin.com/documentation/reference-guide/segments/smart-segments
 collection('orders', {
+  isSearchable: true,
   actions: [],
   fields: [
+  {
+    field: 'id',
+    type: 'String',
+    isGraphQL: false,
+    isSortable: false,
+    get(order) {
+      return order.ref;
+    }
+  }, 
   {
     field: 'ref',
     type: 'String',
     isGraphQL: true,
     isSortable: true,
-    //primaryKey: true, // Not Supported => declared it in the 'fake' sequelize model
+    //primaryKey: true, // Not Supported => create a real smart field id that returns the ref field
   }, 
   {
     field: 'shipping_status',

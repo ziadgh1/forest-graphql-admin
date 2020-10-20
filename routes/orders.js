@@ -1,5 +1,5 @@
 const express = require('express');
-const { PermissionMiddlewareCreator, RecordsGetter } = require('forest-express-sequelize');
+const { PermissionMiddlewareCreator, RecordSerializer } = require('forest-express-sequelize');
 // TODO: is there something better?
 const Liana = require('forest-express-sequelize');
 
@@ -69,8 +69,7 @@ function getCollectionFields(queryFields, collectioName) {
     if (field.isGraphQL) {
       if (field.reference) {
         console.log(field);
-        let queryBelongsToReferenceField = queryFields[field.field].split(',')[0];
-        let belongsToFields = generateBelongsToFields(queryBelongsToReferenceField, field.field);
+        let belongsToFields = generateBelongsToFields(queryFields[field.field], field.field);
         graphQLFields.push(belongsToFields);
       }
       else {
@@ -83,12 +82,12 @@ function getCollectionFields(queryFields, collectioName) {
 // Get a list of Orders
 router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (req, response, next) => {
   //next();
-  permissionMiddlewareCreator;
+  //forestHasura.list(req,response, next);
   const limit = parseInt(req.query.page.size) || 10;
   const offset = (parseInt(req.query.page.number) - 1) * limit;
 
   const selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
-  const whereGraphQL = buildWhereCondition(req.query.search, COLLECTION_NAME);
+  const whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
   const orderBy = getOrderBy(req.query.sort);
 
 
@@ -105,8 +104,8 @@ router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (req, resp
   }
 
   request(GRAPHQL_URL, query, variables).then((data) => {
-    const recordsGetter = new RecordsGetter(models[COLLECTION_NAME]);
-    return recordsGetter.serialize(data[COLLECTION_NAME]);
+    const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+    return recordSerializer.serialize(data[COLLECTION_NAME]);
   })
   .then(recordsSerialized => response.send(recordsSerialized))
   .catch(next);
@@ -129,7 +128,7 @@ function getOrderBy(sort) {
   return '{}';
 }
 // TODO: pas générique :( => mettre un champs isGrahQLSearchable
-function buildWhereCondition (search, collectioName) {
+function buildWhereConditionSearch (search, collectioName) {
   const schema = Liana.Schemas.schemas[collectioName];
 
   let whereCondition = {};
@@ -164,7 +163,7 @@ function generateBelongsToFields(queryBelongsToReferenceField, belongsToCollecti
 router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (req, response, next) => {
   // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-number-of-records
   // next();
-  const whereGraphQL = buildWhereCondition(req.query.search, COLLECTION_NAME);
+  const whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
 
   const query = gql`
     query count {
@@ -184,9 +183,29 @@ router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (req
 });
 
 // Get a Order
-router.get('/orders/:recordId', permissionMiddlewareCreator.details(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-record
-  next();
+router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.details(), (req, response, next) => {
+  // next();
+  const recordId = req.params.recordId;
+  const selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
+
+
+  const query = gql`
+    query get($ref: String!) {
+      ${COLLECTION_NAME}(ref: $ref) {
+        ${selectFields}
+      }
+    }`;
+
+  const variables = {
+    recordId
+  }
+
+  request(GRAPHQL_URL, query, variables).then((data) => {
+    const recordGetter = new RecordGetter(models[COLLECTION_NAME]);
+    return recordGetter.serialize(data[COLLECTION_NAME]);
+  })
+  .then(recordsSerialized => response.send(recordsSerialized))
+  .catch(next);
 });
 
 // Export a list of Orders

@@ -228,7 +228,7 @@
     "integration": null,
     "isReadOnly": false,
     "isSearchable": true,
-    "isVirtual": false,
+    "isVirtual": true,
     "onlyForRelationships": false,
     "paginationType": "page",
     "fields": [{
@@ -288,6 +288,20 @@
       "inverseOf": null,
       "validations": []
     }, {
+      "field": "id",
+      "type": "String",
+      "defaultValue": null,
+      "enums": null,
+      "integration": null,
+      "isFilterable": false,
+      "isReadOnly": true,
+      "isRequired": false,
+      "isSortable": false,
+      "isVirtual": true,
+      "reference": null,
+      "inverseOf": null,
+      "validations": []
+    }, {
       "field": "in_transit_at",
       "type": "Date",
       "defaultValue": null,
@@ -340,20 +354,6 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": true,
-      "reference": null,
-      "inverseOf": null,
-      "validations": []
-    }, {
-      "field": "ref",
-      "type": "String",
-      "defaultValue": null,
-      "enums": null,
-      "integration": null,
-      "isFilterable": true,
-      "isReadOnly": false,
-      "isRequired": true,
-      "isSortable": true,
-      "isVirtual": false,
       "reference": null,
       "inverseOf": null,
       "validations": []
