@@ -126,7 +126,7 @@ function buildWhereConditionSearch (search, collectioName) {
           //wcArray.push({ [???]: { [HASURA_COMPARISONS.ilike]: search} });
         }
         else {
-          wcArray.push({ [field.field]: { [HASURA_COMPARISONS.ilike]: search} });
+          wcArray.push({ [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.ilike]: search} });
         }
       }
     }
@@ -153,10 +153,10 @@ function getDetailsFields (collectioName) {
         //TODO: We just need the ref field ... Steve => how can we do it?
         //TODO2:  / FILTER HERE ON FIELDS without REF & isGraphQL / 
         let result = schemaReference.fields.map(field => camelToUnderscore(field.field)); // camelToUnderscore just while we implement the smart collection of the belongsTo
-        detailsFields.push(field.field + ` {  ${result.join(' ')} } ` );
+        detailsFields.push(camelToUnderscore(field.field) + ` {  ${result.join(' ')} } ` );
       }
       else {
-        detailsFields.push(field.field);
+        detailsFields.push(camelToUnderscore(field.field));
       }
     }
   }
@@ -166,7 +166,7 @@ function getDetailsFields (collectioName) {
 function generateBelongsToFields(queryBelongsToReferenceField, belongsToCollection) {
   let belongsToFields = 'id';
   if (queryBelongsToReferenceField != 'id') {
-    belongsToFields = 'id' + ' ' + queryBelongsToReferenceField;
+    belongsToFields = 'id' + ' ' + camelToUnderscore(queryBelongsToReferenceField);
   }
   return belongsToCollection + ' { ' + belongsToFields + ' } ';;
 }
@@ -190,7 +190,7 @@ function getCollectionFields(queryFields, collectioName) {
         graphQLFields.push(belongsToFields);
       }
       else {
-        graphQLFields.push(queryCollectionField);
+        graphQLFields.push(camelToUnderscore(queryCollectionField));
       }
     }
   }
