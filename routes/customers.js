@@ -29,4 +29,9 @@ router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`,
   response.send({});
 });
 
+// get the relationship hasMany list
+router.get(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  forestHasura.listRelationship(request, response, next);
+});
+
 module.exports = router;

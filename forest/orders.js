@@ -12,7 +12,7 @@ collection('orders', {
   {
     field: 'id',
     type: 'String',
-    isGraphQL: false,
+    isNotGraphQLField: true,
     isSortable: false,
     get(order) {
       return order.ref;
@@ -21,7 +21,6 @@ collection('orders', {
   {
     field: 'ref',
     type: 'String',
-    isGraphQL: true,
     isSortable: true,
     //primaryKey: true, // Not Supported => create a real smart field id that returns the ref field
   }, 
@@ -31,59 +30,48 @@ collection('orders', {
     //isVirtual: false, //Is not supported :(
     //isFilterable: true, //Is not supported :(
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'created_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'updated_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'being_processed_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'ready_for_shipping_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'in_transit_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'shipped_at',
     type: 'Date',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'product',
     type: 'String',
     reference: 'products.id',
     foreignKey: 'product_id',
     isSortable: true,
-    isGraphQL: true,
   },{
     field: 'customer',
     type: 'String',
     reference: 'customers.id',
     foreignKey: 'customer_id',
     isSortable: true,
-
-    isGraphQL: true,
   },{
     field: 'delivery',
     type: 'String',
     reference: 'deliveries.id',
     foreignKey: 'delivery_id',
     isSortable: true,
-    isGraphQL: true,
   },    
   ],
   segments: [],

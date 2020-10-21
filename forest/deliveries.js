@@ -12,38 +12,31 @@ collection('deliveries', {
     {
       field: 'id',
       type: 'Number',
-      isGraphQL: true,
       isSortable: true,
     },{
       field: 'phone',
       type: 'String',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'lng',
       type: 'String',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'lat',
       type: 'Number',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'is_delivered',
       type: 'Boolean',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'created_at',
       type: 'Date',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'updated_at',
       type: 'Date',
       isSortable: true,
-      isGraphQL: true,
     },        
   ],
   segments: [],

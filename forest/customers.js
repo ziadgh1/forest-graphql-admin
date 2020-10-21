@@ -12,39 +12,37 @@ collection('customers', {
     {
       field: 'id',
       type: 'Number',
-      isGraphQL: true,
       isSortable: true,
     },{
       field: 'firstname',
       type: 'String',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'lastname',
       type: 'String',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'email',
       type: 'String',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'stripe_id',
       type: 'Number',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'created_at',
       type: 'Date',
       isSortable: true,
-      isGraphQL: true,
     },{
       field: 'updated_at',
       type: 'Date',
       isSortable: true,
-      isGraphQL: true,
-    },
+    },{
+      field: 'orders',
+      type: ['String'], // Array are excluded from Select / Where GraphQL query builders
+      reference: 'orders.id',
+      foreignKey: 'customer_id',
+    }
   ],
   segments: [],
 });
