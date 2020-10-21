@@ -29,4 +29,20 @@ router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`,
   response.send({});
 });
 
+  
+// Delete a Record
+router.delete(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.delete(request, response, next);
+});
+
+// Delete a list of Record
+router.delete(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.deleteBulk(request, response, next);
+});
+
+// Create a Record
+router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (request, response, next) => {
+  forestHasura.create(request, response, next);
+});
+
 module.exports = router;

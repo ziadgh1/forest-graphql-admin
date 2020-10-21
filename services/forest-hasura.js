@@ -181,13 +181,8 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   this.update  = async function (req, res, next) {
     const recordId = req.params.recordId;
     let attributes = req.body.data.attributes;
-    const relationships = req.body.data.relationships;
-    for (const [key, value] of Object.entries(relationships)) {
-      console.log(`${key}: ${value}`);
-      const schema = Liana.Schemas.schemas[COLLECTION_NAME];
-      const foreignKey = schema.fields.filter(field => field.field === key)[0].foreignKey;
-      attributes[camelToUnderscore(foreignKey)] = value.data.id; //TODO: id field might be different for orders?
-    }
+    attributes = appendRelationshipsAttributes(attributes, req.body.data.relationships, COLLECTION_NAME);
+
     const setValues = JSON5.stringify(attributes, {quote: '"'});
 
     const selectFields = getDetailsFields(COLLECTION_NAME);
@@ -208,6 +203,83 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   
   }
 
+  this.delete  = async function (req, res, next) {
+    const recordId = req.params.recordId;
+    this._deleteRecord(recordId)
+    .then((data) => {
+      res.status(204).send();
+    })
+    .catch(next);  
+  }
+
+  this.deleteBulk  = async function (req, res, next) {
+    let recordIds = req.body.data.attributes.ids;
+    for (let recordId of recordIds) {
+      try {
+        let data = await this._deleteRecord(recordId);
+      }
+      catch(error) {
+        next(error); // TODO: Review this?
+        return;
+      }
+    }
+    res.status(204).send();
+  }
+
+  this._deleteRecord = async function (recordId) {
+    const query = gql`
+      mutation delete {
+        delete_${COLLECTION_NAME}_by_pk(${ID_FIELD}: "${recordId}") {
+          ${ID_FIELD}
+        }
+      }`;
+    
+    return request(GRAPHQL_URL, query);
+  }    
+
+  this.create  = async function (req, res, next) {
+    let attributes = req.body.data.attributes;
+    delete attributes['__meta__']; //TODO: why do we get this?
+    attributes = appendRelationshipsAttributes(attributes, req.body.data.relationships, COLLECTION_NAME);
+
+    const createValues = JSON5.stringify(attributes, {quote: '"'});
+
+    const selectFields = getDetailsFields(COLLECTION_NAME);
+  
+    const query = gql`
+      mutation update {
+        insert_${COLLECTION_NAME}_one(object: ${createValues}) {
+          ${selectFields}
+        }
+      }`;
+  
+    request(GRAPHQL_URL, query).then((data) => {
+      const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+      let record = data[`insert_${COLLECTION_NAME}_one`];
+      if (ID_FIELD !== 'id') {
+        // id is required to be serialized
+        record.id = record[ID_FIELD];
+      }
+      return recordSerializer.serialize(record);
+    })
+    .then(recordsSerialized => res.send(recordsSerialized))
+    .catch(next);
+  
+  }
+
+
+
+}
+
+function appendRelationshipsAttributes(attributes, relationships, collectioName) {
+  if (!relationships) return attributes;
+  for (const [key, value] of Object.entries(relationships)) {
+    console.log(`${key}: ${value}`);
+    const schema = Liana.Schemas.schemas[collectioName];
+    const foreignKey = schema.fields.filter(field => field.field === key)[0].foreignKey;
+    attributes[camelToUnderscore(foreignKey)] = value.data.id; //TODO: id field might be different for orders?
+  }
+  return attributes;
 }
 
 function getOrderBy(sort) {

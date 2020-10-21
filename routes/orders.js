@@ -25,42 +25,36 @@ router.put(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.update()
   forestHasura.update(request, response, next);
 });
 
-// update the relationship is not needed in the relational context
+// Update the relationship is not needed in the relational context
 router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
   response.send({});
 });
   
+// Delete a Record
+router.delete(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.delete(request, response, next);
+});
+
+// Delete a list of Record
+router.delete(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.deleteBulk(request, response, next);
+});
+
+// Create a Record
+router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (request, response, next) => {
+  forestHasura.create(request, response, next);
+});
+
 // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-// Create a Order
-router.post('/orders', permissionMiddlewareCreator.create(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#create-a-record
+// Export a list of Records
+router.get(`/${COLLECTION_NAME}.csv`, permissionMiddlewareCreator.export(), (request, response, next) => {
   next();
 });
-
-
-// Delete a Order
-router.delete('/orders/:recordId', permissionMiddlewareCreator.delete(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-record
-  next();
-});
-
-// Export a list of Orders
-router.get('/orders.csv', permissionMiddlewareCreator.export(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#export-a-list-of-records
-  next();
-});
-
-// Delete a list of Orders
-router.delete('/orders', permissionMiddlewareCreator.delete(), (req, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-list-of-records
-  next();
-});
-
 
 // ==> Not Applicable for Smart Collection
 // // Get a number of Orders
-// router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (req, response, next) => {
+// router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (request, response, next) => {
 //   // next();
 // });
 
