@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 const express = require('express');
 const { PermissionMiddlewareCreator, RecordsGetter } = require('forest-express-sequelize');
 
