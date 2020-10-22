@@ -38,7 +38,7 @@ function ForestHasura(collectionName, graphqlURL) {
     }
 
     /* Build the Order By */
-    const orderBy = getOrderBy(req.query.sort);
+    const orderBy = buildOrderBy(req.query.sort);
 
     /* Get the fields to be retrived in the GraphQL query */
     const queryFields = getGqlQueryFields(req.query.fields, COLLECTION_NAME);
@@ -131,7 +131,7 @@ function ForestHasura(collectionName, graphqlURL) {
     const schema = Liana.Schemas.schemas[COLLECTION_NAME];
     const field = schema.fields.filter((f) => f.field === whereField)[0];
 
-    const whereCondition = getWhereConditionField(field, search);
+    const whereCondition = buildWhereConditionField(field, search);
 
     const whereGraphQL = JSON5.stringify(whereCondition, { quote: '"' });
 
@@ -281,7 +281,7 @@ function getGqlQueryFields(queryFields, collectioName) {
     if (field.isNotGraphQLField || queryCollectionField === ID_FIELD) continue;
 
     if (field.reference) {
-      const belongsToFields = generateBelongsToFields(queryFields[field.field], field.field);
+      const belongsToFields = getBelongsToFields(queryFields[field.field], field.field);
       graphQLFields.push(belongsToFields);
     } else {
       graphQLFields.push(queryCollectionField);
@@ -303,7 +303,7 @@ function getRelationshipsAttributes(attributes, relationships, collectioName) {
   return attributesResult;
 }
 
-function getOrderBy(sort) {
+function buildOrderBy(sort) {
   let sortGraphQL = sort;
   let direction = 'asc';
   if (sortGraphQL) {
@@ -334,7 +334,7 @@ function buildSearchCondition(search, collectioName) {
       if (field.reference) {
         // TODO: Extended search !!
       } else {
-        const whereConditionField = getWhereConditionField(field, search);
+        const whereConditionField = buildWhereConditionField(field, search);
         if (whereConditionField) {
           wcArray.push(whereConditionField);
         }
@@ -345,7 +345,7 @@ function buildSearchCondition(search, collectioName) {
   return JSON5.stringify(whereCondition, { quote: '"' }); // GraphQL expect " for strings and no ' or " for keys
 }
 
-function getWhereConditionField(field, search) {
+function buildWhereConditionField(field, search) {
   switch (field.type) {
     case 'String':
       return { [field.field]: { [HASURA_EXP.ilike]: `%${search}%` } };
@@ -385,7 +385,7 @@ function getGqlFieldsFromCollection(collectioName) {
   return detailsFields.join(' ');
 }
 
-function generateBelongsToFields(queryBelongsToReferenceField, belongsToCollection) {
+function getBelongsToFields(queryBelongsToReferenceField, belongsToCollection) {
   let belongsToFields = ID_FIELD;
   /* id field should always be returned to Forest UI */
   if (queryBelongsToReferenceField !== ID_FIELD) {
