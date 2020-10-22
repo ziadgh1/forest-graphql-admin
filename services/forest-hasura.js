@@ -57,7 +57,15 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     const offset = (parseInt(req.query.page.number) - 1) * limit;
   
     const selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
-    const whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
+    let whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
+    const schema = Liana.Schemas.schemas[COLLECTION_NAME];
+    const querySegment = req.query.segment;
+    if (querySegment) {
+      const segmentArray = schema.segments.filter(segment => segment.name === querySegment);
+      if (segmentArray.length === 1 && segmentArray[0].where) {
+        whereGraphQL = ` { _and: [${segmentArray[0].where()}, ${whereGraphQL} ] }`;
+      }     
+    }
     const orderBy = getOrderBy(req.query.sort);
   
   
@@ -153,6 +161,42 @@ function ForestHasura(collectionName, graphqlURL, idField) {
       const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
       const recordsSerialized = await recordSerializer.serialize(data[COLLECTION_NAME]);
       res.send(recordsSerialized);
+    })
+    .catch(next);    
+  }
+
+  this.listExport  = async function (req, res, next) {
+
+    const limit = parseInt(req.query.page.size) || 10;
+    const offset = (parseInt(req.query.page.number) - 1) * limit;
+  
+    const selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
+    const whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
+    const orderBy = getOrderBy(req.query.sort);
+  
+  
+    const query = gql`
+      query get_all_and_count($limit: Int!, $offset: Int!) {
+        ${COLLECTION_NAME}(limit: $limit, offset: $offset, where: ${whereGraphQL}, order_by: ${orderBy}) {
+          ${selectFields}
+        }
+        ${COLLECTION_NAME}_aggregate(where: ${whereGraphQL}) {
+          aggregate {
+            count
+          }
+        }
+      }`;
+  
+    const variables = {
+      limit,
+      offset
+    }
+  
+    request(GRAPHQL_URL, query, variables).then(async (data) => {
+      const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+      const recordsSerialized = await recordSerializer.serialize(data[COLLECTION_NAME]);
+      const count = data[`${COLLECTION_NAME}_aggregate`].aggregate.count;
+      res.send({ ...recordsSerialized, meta:{ count }})
     })
     .catch(next);    
   }
@@ -274,7 +318,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
 function appendRelationshipsAttributes(attributes, relationships, collectioName) {
   if (!relationships) return attributes;
   for (const [key, value] of Object.entries(relationships)) {
-    console.log(`${key}: ${value}`);
+    //console.log(`${key}: ${value}`);
     const schema = Liana.Schemas.schemas[collectioName];
     const foreignKey = schema.fields.filter(field => field.field === key)[0].foreignKey;
     attributes[camelToUnderscore(foreignKey)] = value.data.id; //TODO: id field might be different for orders?
@@ -325,6 +369,7 @@ function getWhereCondition(field, search) {
     case 'String':
       return { [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.ilike]: '%' + search + '%'} };
     case 'Number':
+      if (isNaN(search)) return;
       return { [camelToUnderscore(field.field)]: { [HASURA_COMPARISONS.eq]: search} };
   }
   return null;
@@ -381,7 +426,7 @@ function getCollectionFields(queryFields, collectioName) {
     const field = schema.fields.filter(item => item.field === queryCollectionField)[0];
     if (field.isNotGraphQLField) continue;
     if (field.reference) {
-      console.log(field);
+      //console.log(field);
       let belongsToFields = generateBelongsToFields(queryFields[field.field], field.field);
       graphQLFields.push(belongsToFields);
     }

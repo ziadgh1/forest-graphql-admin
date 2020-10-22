@@ -10,13 +10,11 @@ const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_N
 
 // Get a list of Orders
 router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, response, next) => {
-  //next();
   forestHasura.list(request, response, next);
 });
 
 // Get a Order
 router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.details(), (request, response, next) => {
-  // next();
   forestHasura.details(request, response, next);
 });
 
@@ -45,11 +43,9 @@ router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (reques
   forestHasura.create(request, response, next);
 });
 
-// ---------------------------------------------------------------------------------------------------------------------------------------------------
-
 // Export a list of Records
 router.get(`/${COLLECTION_NAME}.csv`, permissionMiddlewareCreator.export(), (request, response, next) => {
-  next();
+  forestHasura.exportList(request, response, next);
 });
 
 // ==> Not Applicable for Smart Collection

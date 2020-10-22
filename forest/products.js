@@ -35,5 +35,18 @@ collection('products', {
     isSortable: true,
   },
 ],
-  segments: [],
+  segments: [
+  {
+    name: 'Products > $3000',
+    where: (product) => {
+      return '{ price: {_gt: "3000"} }';
+    }
+  },
+  {
+    name: 'Products Star Wars',
+    where: (product) => {
+      return '{ label: {_ilike: "%Star Wars%"} }';
+    }
+  },
+  ],
 });

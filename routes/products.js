@@ -11,6 +11,7 @@ const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_N
 
 // Get a list of Records
 router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, response, next) => {
+  const segment = request.query.segment;
   forestHasura.list(request, response, next);
 });
 
