@@ -7,21 +7,10 @@ collection('orders', {
     {
       field: 'id',
       type: 'String',
-      isNotGraphQLField: true,
       isSortable: false,
-      get(order) {
-        return order.ref;
-      },
-    }, {
-      field: 'ref',
-      type: 'String',
-      isSortable: true,
-    // primaryKey: true, // Not Supported => create a real smart field id that returns the ref field
     }, {
       field: 'shipping_status',
       type: 'String',
-      // isVirtual: false, //Is not supported :(
-      // isFilterable: true, //Is not supported :(
       isSortable: true,
     }, {
       field: 'created_at',
@@ -58,12 +47,6 @@ collection('orders', {
       type: 'String',
       reference: 'customers.id',
       foreignKey: 'customer_id',
-      isSortable: true,
-    }, {
-      field: 'delivery',
-      type: 'String',
-      reference: 'deliveries.id',
-      foreignKey: 'delivery_id',
       isSortable: true,
     },
   ],

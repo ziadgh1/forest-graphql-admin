@@ -13,13 +13,7 @@ const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_N
 
 // Get a list of Records
 router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, response, next) => {
-  const hrstart = process.hrtime();
-
-  forestHasura.list(request, response, next)
-    .then(() => {
-      const hrend = process.hrtime(hrstart);
-      console.info('Execution time (GraphQL): %ds %dms', hrend[0], hrend[1] / 1000000);
-    });
+  forestHasura.list(request, response, next);
 });
 
 // Get a Record

@@ -6,44 +6,28 @@ const { request, gql } = require('graphql-request');
 const JSON5 = require('json5');
 const { HASURA_EXP, HASURA_OP } = require('./constants');
 
-function getCollectionFields(queryFields, collectioName) {
-  const schema = Liana.Schemas.schemas[collectioName];
+const ID_FIELD = 'id';
 
-  const queryCollectionFields = queryFields[collectioName].split(',');
-  // eslint-disable-next-line prefer-const
-  let graphQLFields = [];
-  for (let i = 0; i < queryCollectionFields.length; i++) {
-    const queryCollectionField = queryCollectionFields[i];
-    const field = schema.fields.filter((item) => item.field === queryCollectionField)[0];
-    // eslint-disable-next-line no-continue
-    if (field.isNotGraphQLField) continue;
-
-    if (field.reference) {
-      const belongsToFields = generateBelongsToFields(queryFields[field.field], field.field);
-      graphQLFields.push(belongsToFields);
-    } else {
-      graphQLFields.push(camelToUnderscore(queryCollectionField));
-    }
-  }
-  return graphQLFields.join(' ');
-}
-
-function ForestHasura(collectionName, graphqlURL, idField) {
+function ForestHasura(collectionName, graphqlURL) {
   const COLLECTION_NAME = collectionName;
   const GRAPHQL_URL = graphqlURL;
-  const ID_FIELD = idField || 'id';
 
   this.list = async function fn(req, res, next) {
+    /* Query with context is used for loading Dropdown widgets of belongsTo fields */
     if (req.query.context) {
       // TODO: dropdown with pagination
       this.listDropdown(req, res, next);
       return;
     }
+
+    /* Pagination Management */
     const limit = parseInt(req.query.page.size, 10) || 10;
     const offset = (parseInt(req.query.page.number, 10) - 1) * limit;
 
-    const selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
-    let whereGraphQL = buildWhereConditionSearch(req.query.search, COLLECTION_NAME);
+    /* Build the where condition based on the search field */
+    let whereGraphQL = buildSearchCondition(req.query.search, COLLECTION_NAME);
+
+    /* Segment Where Implementation: { _and:[{SearchCondition}, {SegmentCondition}] } */
     const schema = Liana.Schemas.schemas[COLLECTION_NAME];
     const querySegment = req.query.segment;
     if (querySegment) {
@@ -53,12 +37,20 @@ function ForestHasura(collectionName, graphqlURL, idField) {
       }
     }
 
+    /* Build the Order By */
     const orderBy = getOrderBy(req.query.sort);
 
+    /* Get the fields to be retrived in the GraphQL query */
+    const queryFields = getGqlQueryFields(req.query.fields, COLLECTION_NAME);
+
+    /* Query Builder:
+     *   getAll => <COLLECTION_NAME>(limit, offset, where, order_by) {}
+     *   count   => <COLLECTION_NAME>_aggregate(where) {}
+    */
     const query = gql`
       query get_all_and_count($limit: Int!, $offset: Int!) {
         ${COLLECTION_NAME}(limit: $limit, offset: $offset, where: ${whereGraphQL}, order_by: ${orderBy}) {
-          ${selectFields}
+          ${queryFields}
         }
         ${COLLECTION_NAME}_aggregate(where: ${whereGraphQL}) {
           aggregate {
@@ -74,6 +66,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
 
     request(GRAPHQL_URL, query, variables).then(async (data) => {
       const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
+      /* Serialize the result using the recordSerializer: getAll + count */
       const recordsSerialized = await recordSerializer.serialize(data[COLLECTION_NAME]);
       const { count } = data[`${COLLECTION_NAME}_aggregate`].aggregate;
       res.send({ ...recordsSerialized, meta: { count } });
@@ -84,20 +77,29 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   this.listRelationship = async function fn(req, res, next) {
     const { recordId, belongsToRelationName } = req.params;
 
+    /* Pagination Management */
     const limit = parseInt(req.query.page.size, 10) || 10;
     const offset = (parseInt(req.query.page.number, 10) - 1) * limit;
 
-    const selectFields = getCollectionFields(req.query.fields, belongsToRelationName);
-
+    /* get the belongsTo schema + foreign key declared */
     const schema = Liana.Schemas.schemas[COLLECTION_NAME];
     const { foreignKey } = schema.fields.filter((f) => f.field === belongsToRelationName)[0];
+
+    /* Build the where condition based on the search field */
     const whereCondition = { [foreignKey]: { [HASURA_EXP.eq]: recordId } };
     const whereGraphQL = JSON5.stringify(whereCondition, { quote: '"' });
 
+    /* Get the fields to be retrived in the GraphQL query */
+    const queryFields = getGqlQueryFields(req.query.fields, belongsToRelationName);
+
+    /* Query Builder:
+     *   getAll => <belongsToRelationName>(limit, offset, where,) {}
+     *   count   => <belongsToRelationName>_aggregate(where) {}
+    */
     const query = gql`
       query get_all_relationship($limit: Int!, $offset: Int!) {
         ${belongsToRelationName}(limit: $limit, offset: $offset, where: ${whereGraphQL}) {
-          ${selectFields}
+          ${queryFields}
         }
         ${belongsToRelationName}_aggregate(where: ${whereGraphQL}) {
           aggregate {
@@ -113,6 +115,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
 
     request(GRAPHQL_URL, query, variables).then(async (data) => {
       const recordSerializer = new RecordSerializer({ name: belongsToRelationName });
+      /* Serialize the result using the recordSerializer: getAll + count */
       const recordsSerialized = await recordSerializer.serialize(data[belongsToRelationName]);
       const { count } = data[`${belongsToRelationName}_aggregate`].aggregate;
       res.send({ ...recordsSerialized, meta: { count } });
@@ -121,10 +124,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   };
 
   this.listDropdown = async function fn(req, res, next) {
-    let selectFields = getCollectionFields(req.query.fields, COLLECTION_NAME);
-    if (selectFields !== 'id') {
-      selectFields = `${ID_FIELD} ${selectFields}`;
-    }
+    const queryFields = getGqlQueryFields(req.query.fields, COLLECTION_NAME);
 
     const whereField = `${req.query.fields[COLLECTION_NAME]}`;
     const { search } = req.query;
@@ -138,7 +138,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     const query = gql`
       query getDropDown {
         ${COLLECTION_NAME}(where: ${whereGraphQL}) {
-          ${selectFields}
+          ${queryFields}
         }
       }`;
 
@@ -149,20 +149,17 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     }).catch(next);
   };
 
-  // eslint-disable-next-line no-unused-vars
-  this.listExport = async function fn(_req, _res, _next) {
-    // TODO: export CSV
-  };
-
   this.details = async function fn(req, res, next) {
     const { recordId } = req.params;
-    if (recordId === 'count') return; // bug?
-    const selectFields = getDetailsFields(COLLECTION_NAME);
+    if (recordId === 'count') return;
+
+    /* Get the fields to be retrived in the GraphQL query */
+    const queryFields = getGqlFieldsFromCollection(COLLECTION_NAME);
 
     const query = gql`
       query details {
         ${COLLECTION_NAME}_by_pk(${ID_FIELD}: "${recordId}") {
-          ${selectFields}
+          ${queryFields}
         }
       }`;
 
@@ -177,7 +174,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   this.update = async function fn(req, res, next) {
     const { recordId } = req.params;
     let { attributes } = req.body.data;
-    attributes = appendRelationshipsAttributes(
+    attributes = getRelationshipsAttributes(
       attributes,
       req.body.data.relationships,
       COLLECTION_NAME,
@@ -185,12 +182,13 @@ function ForestHasura(collectionName, graphqlURL, idField) {
 
     const setValues = JSON5.stringify(attributes, { quote: '"' });
 
-    const selectFields = getDetailsFields(COLLECTION_NAME);
+    /* Get the fields to be retrived in the GraphQL query */
+    const queryFields = getGqlFieldsFromCollection(COLLECTION_NAME);
 
     const query = gql`
       mutation update {
         update_${COLLECTION_NAME}_by_pk(pk_columns: {${ID_FIELD}: "${recordId}"}, _set: ${setValues}) {
-          ${selectFields}
+          ${queryFields}
         }
       }`;
 
@@ -215,6 +213,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     const recordIds = req.body.data.attributes.ids;
     // eslint-disable-next-line no-restricted-syntax
     for (const recordId of recordIds) {
+      // TODO: review the loop with try / catch mechanism => Steve?
       try {
         // eslint-disable-next-line no-await-in-loop
         await this.deleteRecord(recordId);
@@ -240,7 +239,7 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     let { attributes } = req.body.data;
     // eslint-disable-next-line dot-notation
     delete attributes['__meta__'];
-    attributes = appendRelationshipsAttributes(
+    attributes = getRelationshipsAttributes(
       attributes,
       req.body.data.relationships,
       COLLECTION_NAME,
@@ -248,22 +247,18 @@ function ForestHasura(collectionName, graphqlURL, idField) {
 
     const createValues = JSON5.stringify(attributes, { quote: '"' });
 
-    const selectFields = getDetailsFields(COLLECTION_NAME);
+    const queryFields = getGqlFieldsFromCollection(COLLECTION_NAME);
 
     const query = gql`
       mutation update {
         insert_${COLLECTION_NAME}_one(object: ${createValues}) {
-          ${selectFields}
+          ${queryFields}
         }
       }`;
 
     request(GRAPHQL_URL, query).then((data) => {
       const recordSerializer = new RecordSerializer({ name: COLLECTION_NAME });
       const record = data[`insert_${COLLECTION_NAME}_one`];
-      if (ID_FIELD !== 'id') {
-        // id is required to be serialized
-        record.id = record[ID_FIELD];
-      }
       return recordSerializer.serialize(record);
     })
       .then((recordsSerialized) => res.send(recordsSerialized))
@@ -271,7 +266,31 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   };
 }
 
-function appendRelationshipsAttributes(attributes, relationships, collectioName) {
+function getGqlQueryFields(queryFields, collectioName) {
+  const schema = Liana.Schemas.schemas[collectioName];
+
+  const queryCollectionFields = queryFields[collectioName].split(',');
+  // eslint-disable-next-line prefer-const
+  let graphQLFields = [ID_FIELD]; // id is required by Forest Admin UI
+  for (let i = 0; i < queryCollectionFields.length; i++) {
+    const queryCollectionField = queryCollectionFields[i];
+    const field = schema.fields.filter((item) => item.field === queryCollectionField)[0];
+
+    /* Do not add fields flaged isNotGraphQLField or the id (already added by default) */
+    // eslint-disable-next-line no-continue
+    if (field.isNotGraphQLField || queryCollectionField === ID_FIELD) continue;
+
+    if (field.reference) {
+      const belongsToFields = generateBelongsToFields(queryFields[field.field], field.field);
+      graphQLFields.push(belongsToFields);
+    } else {
+      graphQLFields.push(queryCollectionField);
+    }
+  }
+  return graphQLFields.join(' ');
+}
+
+function getRelationshipsAttributes(attributes, relationships, collectioName) {
   if (!relationships) return attributes;
   // eslint-disable-next-line prefer-const
   let attributesResult = attributes || {};
@@ -279,8 +298,7 @@ function appendRelationshipsAttributes(attributes, relationships, collectioName)
   for (const [key, value] of Object.entries(relationships)) {
     const schema = Liana.Schemas.schemas[collectioName];
     const { foreignKey } = schema.fields.filter((field) => field.field === key)[0];
-    // TODO: id field might be different for orders?
-    attributesResult[camelToUnderscore(foreignKey)] = value.data.id;
+    attributesResult[foreignKey] = value.data.id;
   }
   return attributesResult;
 }
@@ -302,7 +320,7 @@ function getOrderBy(sort) {
   return '{}';
 }
 
-function buildWhereConditionSearch(search, collectioName) {
+function buildSearchCondition(search, collectioName) {
   const schema = Liana.Schemas.schemas[collectioName];
 
   let whereCondition = {};
@@ -330,22 +348,17 @@ function buildWhereConditionSearch(search, collectioName) {
 function getWhereConditionField(field, search) {
   switch (field.type) {
     case 'String':
-      return { [camelToUnderscore(field.field)]: { [HASURA_EXP.ilike]: `%${search}%` } };
+      return { [field.field]: { [HASURA_EXP.ilike]: `%${search}%` } };
     case 'Number':
       // eslint-disable-next-line no-restricted-globals
       if (isNaN(search)) return null;
-      return { [camelToUnderscore(field.field)]: { [HASURA_EXP.eq]: search } };
+      return { [field.field]: { [HASURA_EXP.eq]: search } };
     default:
       return null;
   }
 }
 
-function camelToUnderscore(key) {
-  const result = key.replace(/([A-Z])/g, ' $1');
-  return result.split(' ').join('_').toLowerCase();
-}
-
-function getDetailsFields(collectioName) {
+function getGqlFieldsFromCollection(collectioName) {
   const schema = Liana.Schemas.schemas[collectioName];
 
   // eslint-disable-next-line prefer-const
@@ -362,21 +375,21 @@ function getDetailsFields(collectioName) {
       const result = schemaReference.fields.map((f) => {
         // do not load hasMany relationships or Not GraphQL Field
         if (Array.isArray(f.type) || f.isNotGraphQLField) return null;
-        // camelToUnderscore just while we implement the smart collection of the belongsTo
-        return camelToUnderscore(f.field);
+        return f.field;
       });
-      detailsFields.push(`${camelToUnderscore(field.field)} { ${result.join(' ')} } `);
+      detailsFields.push(`${field.field} { ${result.join(' ')} } `);
     } else {
-      detailsFields.push(camelToUnderscore(field.field));
+      detailsFields.push(field.field);
     }
   }
   return detailsFields.join(' ');
 }
 
 function generateBelongsToFields(queryBelongsToReferenceField, belongsToCollection) {
-  let belongsToFields = 'id';
-  if (queryBelongsToReferenceField !== 'id') { // This id can be different?
-    belongsToFields = `${'id'} ${camelToUnderscore(queryBelongsToReferenceField)}`;
+  let belongsToFields = ID_FIELD;
+  /* id field should always be returned to Forest UI */
+  if (queryBelongsToReferenceField !== ID_FIELD) {
+    belongsToFields = `${ID_FIELD} ${queryBelongsToReferenceField}`;
   }
   return `${belongsToCollection} { ${belongsToFields} } `;
 }

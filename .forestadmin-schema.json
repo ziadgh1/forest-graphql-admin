@@ -288,20 +288,6 @@
       "inverseOf": null,
       "validations": []
     }, {
-      "field": "delivery",
-      "type": "String",
-      "defaultValue": null,
-      "enums": null,
-      "integration": null,
-      "isFilterable": false,
-      "isReadOnly": true,
-      "isRequired": false,
-      "isSortable": true,
-      "isVirtual": true,
-      "reference": "deliveries.id",
-      "inverseOf": null,
-      "validations": []
-    }, {
       "field": "id",
       "type": "String",
       "defaultValue": null,
@@ -346,20 +332,6 @@
     }, {
       "field": "ready_for_shipping_at",
       "type": "Date",
-      "defaultValue": null,
-      "enums": null,
-      "integration": null,
-      "isFilterable": false,
-      "isReadOnly": true,
-      "isRequired": false,
-      "isSortable": true,
-      "isVirtual": true,
-      "reference": null,
-      "inverseOf": null,
-      "validations": []
-    }, {
-      "field": "ref",
-      "type": "String",
       "defaultValue": null,
       "enums": null,
       "integration": null,
