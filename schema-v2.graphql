@@ -1,0 +1,2120 @@
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}
+
+# expression to compare columns of type Boolean. All fields are combined with logical 'AND'.
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _gt: Boolean
+  _gte: Boolean
+  _in: [Boolean!]
+  _is_null: Boolean
+  _lt: Boolean
+  _lte: Boolean
+  _neq: Boolean
+  _nin: [Boolean!]
+}
+
+# columns and relationships of "customers"
+type customers {
+  created_at: timestamp
+  email: String
+  firstname: String
+  id: Int!
+  lastname: String
+
+  # An array relationship
+  orders(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): [orders!]!
+
+  # An aggregated array relationship
+  orders_aggregate(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): orders_aggregate!
+  stripe_id: String
+  updated_at: timestamp
+}
+
+# aggregated selection of "customers"
+type customers_aggregate {
+  aggregate: customers_aggregate_fields
+  nodes: [customers!]!
+}
+
+# aggregate fields of "customers"
+type customers_aggregate_fields {
+  avg: customers_avg_fields
+  count(columns: [customers_select_column!], distinct: Boolean): Int
+  max: customers_max_fields
+  min: customers_min_fields
+  stddev: customers_stddev_fields
+  stddev_pop: customers_stddev_pop_fields
+  stddev_samp: customers_stddev_samp_fields
+  sum: customers_sum_fields
+  var_pop: customers_var_pop_fields
+  var_samp: customers_var_samp_fields
+  variance: customers_variance_fields
+}
+
+# order by aggregate values of table "customers"
+input customers_aggregate_order_by {
+  avg: customers_avg_order_by
+  count: order_by
+  max: customers_max_order_by
+  min: customers_min_order_by
+  stddev: customers_stddev_order_by
+  stddev_pop: customers_stddev_pop_order_by
+  stddev_samp: customers_stddev_samp_order_by
+  sum: customers_sum_order_by
+  var_pop: customers_var_pop_order_by
+  var_samp: customers_var_samp_order_by
+  variance: customers_variance_order_by
+}
+
+# input type for inserting array relation for remote table "customers"
+input customers_arr_rel_insert_input {
+  data: [customers_insert_input!]!
+  on_conflict: customers_on_conflict
+}
+
+# aggregate avg on columns
+type customers_avg_fields {
+  id: Float
+}
+
+# order by avg() on columns of table "customers"
+input customers_avg_order_by {
+  id: order_by
+}
+
+# Boolean expression to filter rows from the table "customers". All fields are combined with a logical 'AND'.
+input customers_bool_exp {
+  _and: [customers_bool_exp]
+  _not: customers_bool_exp
+  _or: [customers_bool_exp]
+  created_at: timestamp_comparison_exp
+  email: String_comparison_exp
+  firstname: String_comparison_exp
+  id: Int_comparison_exp
+  lastname: String_comparison_exp
+  orders: orders_bool_exp
+  stripe_id: String_comparison_exp
+  updated_at: timestamp_comparison_exp
+}
+
+# unique or primary key constraints on table "customers"
+enum customers_constraint {
+  # unique or primary key constraint
+  customers_pkey
+}
+
+# input type for incrementing integer column in table "customers"
+input customers_inc_input {
+  id: Int
+}
+
+# input type for inserting data into table "customers"
+input customers_insert_input {
+  created_at: timestamp
+  email: String
+  firstname: String
+  id: Int
+  lastname: String
+  orders: orders_arr_rel_insert_input
+  stripe_id: String
+  updated_at: timestamp
+}
+
+# aggregate max on columns
+type customers_max_fields {
+  created_at: timestamp
+  email: String
+  firstname: String
+  id: Int
+  lastname: String
+  stripe_id: String
+  updated_at: timestamp
+}
+
+# order by max() on columns of table "customers"
+input customers_max_order_by {
+  created_at: order_by
+  email: order_by
+  firstname: order_by
+  id: order_by
+  lastname: order_by
+  stripe_id: order_by
+  updated_at: order_by
+}
+
+# aggregate min on columns
+type customers_min_fields {
+  created_at: timestamp
+  email: String
+  firstname: String
+  id: Int
+  lastname: String
+  stripe_id: String
+  updated_at: timestamp
+}
+
+# order by min() on columns of table "customers"
+input customers_min_order_by {
+  created_at: order_by
+  email: order_by
+  firstname: order_by
+  id: order_by
+  lastname: order_by
+  stripe_id: order_by
+  updated_at: order_by
+}
+
+# response of any mutation on the table "customers"
+type customers_mutation_response {
+  # number of affected rows by the mutation
+  affected_rows: Int!
+
+  # data of the affected rows by the mutation
+  returning: [customers!]!
+}
+
+# input type for inserting object relation for remote table "customers"
+input customers_obj_rel_insert_input {
+  data: customers_insert_input!
+  on_conflict: customers_on_conflict
+}
+
+# on conflict condition type for table "customers"
+input customers_on_conflict {
+  constraint: customers_constraint!
+  update_columns: [customers_update_column!]!
+  where: customers_bool_exp
+}
+
+# ordering options when selecting data from "customers"
+input customers_order_by {
+  created_at: order_by
+  email: order_by
+  firstname: order_by
+  id: order_by
+  lastname: order_by
+  orders_aggregate: orders_aggregate_order_by
+  stripe_id: order_by
+  updated_at: order_by
+}
+
+# primary key columns input for table: "customers"
+input customers_pk_columns_input {
+  id: Int!
+}
+
+# select columns of table "customers"
+enum customers_select_column {
+  # column name
+  created_at
+
+  # column name
+  email
+
+  # column name
+  firstname
+
+  # column name
+  id
+
+  # column name
+  lastname
+
+  # column name
+  stripe_id
+
+  # column name
+  updated_at
+}
+
+# input type for updating data in table "customers"
+input customers_set_input {
+  created_at: timestamp
+  email: String
+  firstname: String
+  id: Int
+  lastname: String
+  stripe_id: String
+  updated_at: timestamp
+}
+
+# aggregate stddev on columns
+type customers_stddev_fields {
+  id: Float
+}
+
+# order by stddev() on columns of table "customers"
+input customers_stddev_order_by {
+  id: order_by
+}
+
+# aggregate stddev_pop on columns
+type customers_stddev_pop_fields {
+  id: Float
+}
+
+# order by stddev_pop() on columns of table "customers"
+input customers_stddev_pop_order_by {
+  id: order_by
+}
+
+# aggregate stddev_samp on columns
+type customers_stddev_samp_fields {
+  id: Float
+}
+
+# order by stddev_samp() on columns of table "customers"
+input customers_stddev_samp_order_by {
+  id: order_by
+}
+
+# aggregate sum on columns
+type customers_sum_fields {
+  id: Int
+}
+
+# order by sum() on columns of table "customers"
+input customers_sum_order_by {
+  id: order_by
+}
+
+# update columns of table "customers"
+enum customers_update_column {
+  # column name
+  created_at
+
+  # column name
+  email
+
+  # column name
+  firstname
+
+  # column name
+  id
+
+  # column name
+  lastname
+
+  # column name
+  stripe_id
+
+  # column name
+  updated_at
+}
+
+# aggregate var_pop on columns
+type customers_var_pop_fields {
+  id: Float
+}
+
+# order by var_pop() on columns of table "customers"
+input customers_var_pop_order_by {
+  id: order_by
+}
+
+# aggregate var_samp on columns
+type customers_var_samp_fields {
+  id: Float
+}
+
+# order by var_samp() on columns of table "customers"
+input customers_var_samp_order_by {
+  id: order_by
+}
+
+# aggregate variance on columns
+type customers_variance_fields {
+  id: Float
+}
+
+# order by variance() on columns of table "customers"
+input customers_variance_order_by {
+  id: order_by
+}
+
+# columns and relationships of "deliveries"
+type deliveries {
+  created_at: timestamp
+  id: Int!
+  is_delivered: Boolean
+  lat: float8
+  lng: float8
+
+  # An array relationship
+  orders(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): [orders!]!
+
+  # An aggregated array relationship
+  orders_aggregate(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): orders_aggregate!
+  phone: String
+  updated_at: timestamp
+}
+
+# aggregated selection of "deliveries"
+type deliveries_aggregate {
+  aggregate: deliveries_aggregate_fields
+  nodes: [deliveries!]!
+}
+
+# aggregate fields of "deliveries"
+type deliveries_aggregate_fields {
+  avg: deliveries_avg_fields
+  count(columns: [deliveries_select_column!], distinct: Boolean): Int
+  max: deliveries_max_fields
+  min: deliveries_min_fields
+  stddev: deliveries_stddev_fields
+  stddev_pop: deliveries_stddev_pop_fields
+  stddev_samp: deliveries_stddev_samp_fields
+  sum: deliveries_sum_fields
+  var_pop: deliveries_var_pop_fields
+  var_samp: deliveries_var_samp_fields
+  variance: deliveries_variance_fields
+}
+
+# order by aggregate values of table "deliveries"
+input deliveries_aggregate_order_by {
+  avg: deliveries_avg_order_by
+  count: order_by
+  max: deliveries_max_order_by
+  min: deliveries_min_order_by
+  stddev: deliveries_stddev_order_by
+  stddev_pop: deliveries_stddev_pop_order_by
+  stddev_samp: deliveries_stddev_samp_order_by
+  sum: deliveries_sum_order_by
+  var_pop: deliveries_var_pop_order_by
+  var_samp: deliveries_var_samp_order_by
+  variance: deliveries_variance_order_by
+}
+
+# input type for inserting array relation for remote table "deliveries"
+input deliveries_arr_rel_insert_input {
+  data: [deliveries_insert_input!]!
+  on_conflict: deliveries_on_conflict
+}
+
+# aggregate avg on columns
+type deliveries_avg_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by avg() on columns of table "deliveries"
+input deliveries_avg_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# Boolean expression to filter rows from the table "deliveries". All fields are combined with a logical 'AND'.
+input deliveries_bool_exp {
+  _and: [deliveries_bool_exp]
+  _not: deliveries_bool_exp
+  _or: [deliveries_bool_exp]
+  created_at: timestamp_comparison_exp
+  id: Int_comparison_exp
+  is_delivered: Boolean_comparison_exp
+  lat: float8_comparison_exp
+  lng: float8_comparison_exp
+  orders: orders_bool_exp
+  phone: String_comparison_exp
+  updated_at: timestamp_comparison_exp
+}
+
+# unique or primary key constraints on table "deliveries"
+enum deliveries_constraint {
+  # unique or primary key constraint
+  deliveries_pkey
+}
+
+# input type for incrementing integer column in table "deliveries"
+input deliveries_inc_input {
+  id: Int
+  lat: float8
+  lng: float8
+}
+
+# input type for inserting data into table "deliveries"
+input deliveries_insert_input {
+  created_at: timestamp
+  id: Int
+  is_delivered: Boolean
+  lat: float8
+  lng: float8
+  orders: orders_arr_rel_insert_input
+  phone: String
+  updated_at: timestamp
+}
+
+# aggregate max on columns
+type deliveries_max_fields {
+  created_at: timestamp
+  id: Int
+  lat: float8
+  lng: float8
+  phone: String
+  updated_at: timestamp
+}
+
+# order by max() on columns of table "deliveries"
+input deliveries_max_order_by {
+  created_at: order_by
+  id: order_by
+  lat: order_by
+  lng: order_by
+  phone: order_by
+  updated_at: order_by
+}
+
+# aggregate min on columns
+type deliveries_min_fields {
+  created_at: timestamp
+  id: Int
+  lat: float8
+  lng: float8
+  phone: String
+  updated_at: timestamp
+}
+
+# order by min() on columns of table "deliveries"
+input deliveries_min_order_by {
+  created_at: order_by
+  id: order_by
+  lat: order_by
+  lng: order_by
+  phone: order_by
+  updated_at: order_by
+}
+
+# response of any mutation on the table "deliveries"
+type deliveries_mutation_response {
+  # number of affected rows by the mutation
+  affected_rows: Int!
+
+  # data of the affected rows by the mutation
+  returning: [deliveries!]!
+}
+
+# input type for inserting object relation for remote table "deliveries"
+input deliveries_obj_rel_insert_input {
+  data: deliveries_insert_input!
+  on_conflict: deliveries_on_conflict
+}
+
+# on conflict condition type for table "deliveries"
+input deliveries_on_conflict {
+  constraint: deliveries_constraint!
+  update_columns: [deliveries_update_column!]!
+  where: deliveries_bool_exp
+}
+
+# ordering options when selecting data from "deliveries"
+input deliveries_order_by {
+  created_at: order_by
+  id: order_by
+  is_delivered: order_by
+  lat: order_by
+  lng: order_by
+  orders_aggregate: orders_aggregate_order_by
+  phone: order_by
+  updated_at: order_by
+}
+
+# primary key columns input for table: "deliveries"
+input deliveries_pk_columns_input {
+  id: Int!
+}
+
+# select columns of table "deliveries"
+enum deliveries_select_column {
+  # column name
+  created_at
+
+  # column name
+  id
+
+  # column name
+  is_delivered
+
+  # column name
+  lat
+
+  # column name
+  lng
+
+  # column name
+  phone
+
+  # column name
+  updated_at
+}
+
+# input type for updating data in table "deliveries"
+input deliveries_set_input {
+  created_at: timestamp
+  id: Int
+  is_delivered: Boolean
+  lat: float8
+  lng: float8
+  phone: String
+  updated_at: timestamp
+}
+
+# aggregate stddev on columns
+type deliveries_stddev_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by stddev() on columns of table "deliveries"
+input deliveries_stddev_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# aggregate stddev_pop on columns
+type deliveries_stddev_pop_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by stddev_pop() on columns of table "deliveries"
+input deliveries_stddev_pop_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# aggregate stddev_samp on columns
+type deliveries_stddev_samp_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by stddev_samp() on columns of table "deliveries"
+input deliveries_stddev_samp_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# aggregate sum on columns
+type deliveries_sum_fields {
+  id: Int
+  lat: float8
+  lng: float8
+}
+
+# order by sum() on columns of table "deliveries"
+input deliveries_sum_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# update columns of table "deliveries"
+enum deliveries_update_column {
+  # column name
+  created_at
+
+  # column name
+  id
+
+  # column name
+  is_delivered
+
+  # column name
+  lat
+
+  # column name
+  lng
+
+  # column name
+  phone
+
+  # column name
+  updated_at
+}
+
+# aggregate var_pop on columns
+type deliveries_var_pop_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by var_pop() on columns of table "deliveries"
+input deliveries_var_pop_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# aggregate var_samp on columns
+type deliveries_var_samp_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by var_samp() on columns of table "deliveries"
+input deliveries_var_samp_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+# aggregate variance on columns
+type deliveries_variance_fields {
+  id: Float
+  lat: Float
+  lng: Float
+}
+
+# order by variance() on columns of table "deliveries"
+input deliveries_variance_order_by {
+  id: order_by
+  lat: order_by
+  lng: order_by
+}
+
+scalar float8
+
+# expression to compare columns of type float8. All fields are combined with logical 'AND'.
+input float8_comparison_exp {
+  _eq: float8
+  _gt: float8
+  _gte: float8
+  _in: [float8!]
+  _is_null: Boolean
+  _lt: float8
+  _lte: float8
+  _neq: float8
+  _nin: [float8!]
+}
+
+# expression to compare columns of type Int. All fields are combined with logical 'AND'.
+input Int_comparison_exp {
+  _eq: Int
+  _gt: Int
+  _gte: Int
+  _in: [Int!]
+  _is_null: Boolean
+  _lt: Int
+  _lte: Int
+  _neq: Int
+  _nin: [Int!]
+}
+
+# mutation root
+type mutation_root {
+  # delete data from the table: "customers"
+  delete_customers(
+    # filter the rows which have to be deleted
+    where: customers_bool_exp!
+  ): customers_mutation_response
+
+  # delete single row from the table: "customers"
+  delete_customers_by_pk(id: Int!): customers
+
+  # delete data from the table: "deliveries"
+  delete_deliveries(
+    # filter the rows which have to be deleted
+    where: deliveries_bool_exp!
+  ): deliveries_mutation_response
+
+  # delete single row from the table: "deliveries"
+  delete_deliveries_by_pk(id: Int!): deliveries
+
+  # delete data from the table: "orders"
+  delete_orders(
+    # filter the rows which have to be deleted
+    where: orders_bool_exp!
+  ): orders_mutation_response
+
+  # delete single row from the table: "orders"
+  delete_orders_by_pk(ref: String!): orders
+
+  # delete data from the table: "products"
+  delete_products(
+    # filter the rows which have to be deleted
+    where: products_bool_exp!
+  ): products_mutation_response
+
+  # delete single row from the table: "products"
+  delete_products_by_pk(id: Int!): products
+
+  # insert data into the table: "customers"
+  insert_customers(
+    # the rows to be inserted
+    objects: [customers_insert_input!]!
+
+    # on conflict condition
+    on_conflict: customers_on_conflict
+  ): customers_mutation_response
+
+  # insert a single row into the table: "customers"
+  insert_customers_one(
+    # the row to be inserted
+    object: customers_insert_input!
+
+    # on conflict condition
+    on_conflict: customers_on_conflict
+  ): customers
+
+  # insert data into the table: "deliveries"
+  insert_deliveries(
+    # the rows to be inserted
+    objects: [deliveries_insert_input!]!
+
+    # on conflict condition
+    on_conflict: deliveries_on_conflict
+  ): deliveries_mutation_response
+
+  # insert a single row into the table: "deliveries"
+  insert_deliveries_one(
+    # the row to be inserted
+    object: deliveries_insert_input!
+
+    # on conflict condition
+    on_conflict: deliveries_on_conflict
+  ): deliveries
+
+  # insert data into the table: "orders"
+  insert_orders(
+    # the rows to be inserted
+    objects: [orders_insert_input!]!
+
+    # on conflict condition
+    on_conflict: orders_on_conflict
+  ): orders_mutation_response
+
+  # insert a single row into the table: "orders"
+  insert_orders_one(
+    # the row to be inserted
+    object: orders_insert_input!
+
+    # on conflict condition
+    on_conflict: orders_on_conflict
+  ): orders
+
+  # insert data into the table: "products"
+  insert_products(
+    # the rows to be inserted
+    objects: [products_insert_input!]!
+
+    # on conflict condition
+    on_conflict: products_on_conflict
+  ): products_mutation_response
+
+  # insert a single row into the table: "products"
+  insert_products_one(
+    # the row to be inserted
+    object: products_insert_input!
+
+    # on conflict condition
+    on_conflict: products_on_conflict
+  ): products
+
+  # update data of the table: "customers"
+  update_customers(
+    # increments the integer columns with given value of the filtered values
+    _inc: customers_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: customers_set_input
+
+    # filter the rows which have to be updated
+    where: customers_bool_exp!
+  ): customers_mutation_response
+
+  # update single row of the table: "customers"
+  update_customers_by_pk(
+    # increments the integer columns with given value of the filtered values
+    _inc: customers_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: customers_set_input
+    pk_columns: customers_pk_columns_input!
+  ): customers
+
+  # update data of the table: "deliveries"
+  update_deliveries(
+    # increments the integer columns with given value of the filtered values
+    _inc: deliveries_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: deliveries_set_input
+
+    # filter the rows which have to be updated
+    where: deliveries_bool_exp!
+  ): deliveries_mutation_response
+
+  # update single row of the table: "deliveries"
+  update_deliveries_by_pk(
+    # increments the integer columns with given value of the filtered values
+    _inc: deliveries_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: deliveries_set_input
+    pk_columns: deliveries_pk_columns_input!
+  ): deliveries
+
+  # update data of the table: "orders"
+  update_orders(
+    # increments the integer columns with given value of the filtered values
+    _inc: orders_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: orders_set_input
+
+    # filter the rows which have to be updated
+    where: orders_bool_exp!
+  ): orders_mutation_response
+
+  # update single row of the table: "orders"
+  update_orders_by_pk(
+    # increments the integer columns with given value of the filtered values
+    _inc: orders_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: orders_set_input
+    pk_columns: orders_pk_columns_input!
+  ): orders
+
+  # update data of the table: "products"
+  update_products(
+    # increments the integer columns with given value of the filtered values
+    _inc: products_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: products_set_input
+
+    # filter the rows which have to be updated
+    where: products_bool_exp!
+  ): products_mutation_response
+
+  # update single row of the table: "products"
+  update_products_by_pk(
+    # increments the integer columns with given value of the filtered values
+    _inc: products_inc_input
+
+    # sets the columns of the filtered rows to the given values
+    _set: products_set_input
+    pk_columns: products_pk_columns_input!
+  ): products
+}
+
+# column ordering options
+enum order_by {
+  # in the ascending order, nulls last
+  asc
+
+  # in the ascending order, nulls first
+  asc_nulls_first
+
+  # in the ascending order, nulls last
+  asc_nulls_last
+
+  # in the descending order, nulls first
+  desc
+
+  # in the descending order, nulls first
+  desc_nulls_first
+
+  # in the descending order, nulls last
+  desc_nulls_last
+}
+
+# columns and relationships of "orders"
+type orders {
+  being_processed_at: timestamp
+  created_at: timestamp
+
+  # An object relationship
+  customer: customers
+  customer_id: Int
+
+  # An object relationship
+  delivery: deliveries
+  delivery_id: Int
+  in_transit_at: timestamp
+
+  # An object relationship
+  product: products
+  product_id: Int
+  ready_for_shipping_at: timestamp
+  ref: String!
+  shipped_at: timestamp
+  shipping_status: String
+  updated_at: timestamp
+}
+
+# aggregated selection of "orders"
+type orders_aggregate {
+  aggregate: orders_aggregate_fields
+  nodes: [orders!]!
+}
+
+# aggregate fields of "orders"
+type orders_aggregate_fields {
+  avg: orders_avg_fields
+  count(columns: [orders_select_column!], distinct: Boolean): Int
+  max: orders_max_fields
+  min: orders_min_fields
+  stddev: orders_stddev_fields
+  stddev_pop: orders_stddev_pop_fields
+  stddev_samp: orders_stddev_samp_fields
+  sum: orders_sum_fields
+  var_pop: orders_var_pop_fields
+  var_samp: orders_var_samp_fields
+  variance: orders_variance_fields
+}
+
+# order by aggregate values of table "orders"
+input orders_aggregate_order_by {
+  avg: orders_avg_order_by
+  count: order_by
+  max: orders_max_order_by
+  min: orders_min_order_by
+  stddev: orders_stddev_order_by
+  stddev_pop: orders_stddev_pop_order_by
+  stddev_samp: orders_stddev_samp_order_by
+  sum: orders_sum_order_by
+  var_pop: orders_var_pop_order_by
+  var_samp: orders_var_samp_order_by
+  variance: orders_variance_order_by
+}
+
+# input type for inserting array relation for remote table "orders"
+input orders_arr_rel_insert_input {
+  data: [orders_insert_input!]!
+  on_conflict: orders_on_conflict
+}
+
+# aggregate avg on columns
+type orders_avg_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by avg() on columns of table "orders"
+input orders_avg_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# Boolean expression to filter rows from the table "orders". All fields are combined with a logical 'AND'.
+input orders_bool_exp {
+  _and: [orders_bool_exp]
+  _not: orders_bool_exp
+  _or: [orders_bool_exp]
+  being_processed_at: timestamp_comparison_exp
+  created_at: timestamp_comparison_exp
+  customer: customers_bool_exp
+  customer_id: Int_comparison_exp
+  delivery: deliveries_bool_exp
+  delivery_id: Int_comparison_exp
+  in_transit_at: timestamp_comparison_exp
+  product: products_bool_exp
+  product_id: Int_comparison_exp
+  ready_for_shipping_at: timestamp_comparison_exp
+  ref: String_comparison_exp
+  shipped_at: timestamp_comparison_exp
+  shipping_status: String_comparison_exp
+  updated_at: timestamp_comparison_exp
+}
+
+# unique or primary key constraints on table "orders"
+enum orders_constraint {
+  # unique or primary key constraint
+  orders_pkey
+}
+
+# input type for incrementing integer column in table "orders"
+input orders_inc_input {
+  customer_id: Int
+  delivery_id: Int
+  product_id: Int
+}
+
+# input type for inserting data into table "orders"
+input orders_insert_input {
+  being_processed_at: timestamp
+  created_at: timestamp
+  customer: customers_obj_rel_insert_input
+  customer_id: Int
+  delivery: deliveries_obj_rel_insert_input
+  delivery_id: Int
+  in_transit_at: timestamp
+  product: products_obj_rel_insert_input
+  product_id: Int
+  ready_for_shipping_at: timestamp
+  ref: String
+  shipped_at: timestamp
+  shipping_status: String
+  updated_at: timestamp
+}
+
+# aggregate max on columns
+type orders_max_fields {
+  being_processed_at: timestamp
+  created_at: timestamp
+  customer_id: Int
+  delivery_id: Int
+  in_transit_at: timestamp
+  product_id: Int
+  ready_for_shipping_at: timestamp
+  ref: String
+  shipped_at: timestamp
+  shipping_status: String
+  updated_at: timestamp
+}
+
+# order by max() on columns of table "orders"
+input orders_max_order_by {
+  being_processed_at: order_by
+  created_at: order_by
+  customer_id: order_by
+  delivery_id: order_by
+  in_transit_at: order_by
+  product_id: order_by
+  ready_for_shipping_at: order_by
+  ref: order_by
+  shipped_at: order_by
+  shipping_status: order_by
+  updated_at: order_by
+}
+
+# aggregate min on columns
+type orders_min_fields {
+  being_processed_at: timestamp
+  created_at: timestamp
+  customer_id: Int
+  delivery_id: Int
+  in_transit_at: timestamp
+  product_id: Int
+  ready_for_shipping_at: timestamp
+  ref: String
+  shipped_at: timestamp
+  shipping_status: String
+  updated_at: timestamp
+}
+
+# order by min() on columns of table "orders"
+input orders_min_order_by {
+  being_processed_at: order_by
+  created_at: order_by
+  customer_id: order_by
+  delivery_id: order_by
+  in_transit_at: order_by
+  product_id: order_by
+  ready_for_shipping_at: order_by
+  ref: order_by
+  shipped_at: order_by
+  shipping_status: order_by
+  updated_at: order_by
+}
+
+# response of any mutation on the table "orders"
+type orders_mutation_response {
+  # number of affected rows by the mutation
+  affected_rows: Int!
+
+  # data of the affected rows by the mutation
+  returning: [orders!]!
+}
+
+# input type for inserting object relation for remote table "orders"
+input orders_obj_rel_insert_input {
+  data: orders_insert_input!
+  on_conflict: orders_on_conflict
+}
+
+# on conflict condition type for table "orders"
+input orders_on_conflict {
+  constraint: orders_constraint!
+  update_columns: [orders_update_column!]!
+  where: orders_bool_exp
+}
+
+# ordering options when selecting data from "orders"
+input orders_order_by {
+  being_processed_at: order_by
+  created_at: order_by
+  customer: customers_order_by
+  customer_id: order_by
+  delivery: deliveries_order_by
+  delivery_id: order_by
+  in_transit_at: order_by
+  product: products_order_by
+  product_id: order_by
+  ready_for_shipping_at: order_by
+  ref: order_by
+  shipped_at: order_by
+  shipping_status: order_by
+  updated_at: order_by
+}
+
+# primary key columns input for table: "orders"
+input orders_pk_columns_input {
+  ref: String!
+}
+
+# select columns of table "orders"
+enum orders_select_column {
+  # column name
+  being_processed_at
+
+  # column name
+  created_at
+
+  # column name
+  customer_id
+
+  # column name
+  delivery_id
+
+  # column name
+  in_transit_at
+
+  # column name
+  product_id
+
+  # column name
+  ready_for_shipping_at
+
+  # column name
+  ref
+
+  # column name
+  shipped_at
+
+  # column name
+  shipping_status
+
+  # column name
+  updated_at
+}
+
+# input type for updating data in table "orders"
+input orders_set_input {
+  being_processed_at: timestamp
+  created_at: timestamp
+  customer_id: Int
+  delivery_id: Int
+  in_transit_at: timestamp
+  product_id: Int
+  ready_for_shipping_at: timestamp
+  ref: String
+  shipped_at: timestamp
+  shipping_status: String
+  updated_at: timestamp
+}
+
+# aggregate stddev on columns
+type orders_stddev_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by stddev() on columns of table "orders"
+input orders_stddev_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# aggregate stddev_pop on columns
+type orders_stddev_pop_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by stddev_pop() on columns of table "orders"
+input orders_stddev_pop_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# aggregate stddev_samp on columns
+type orders_stddev_samp_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by stddev_samp() on columns of table "orders"
+input orders_stddev_samp_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# aggregate sum on columns
+type orders_sum_fields {
+  customer_id: Int
+  delivery_id: Int
+  product_id: Int
+}
+
+# order by sum() on columns of table "orders"
+input orders_sum_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# update columns of table "orders"
+enum orders_update_column {
+  # column name
+  being_processed_at
+
+  # column name
+  created_at
+
+  # column name
+  customer_id
+
+  # column name
+  delivery_id
+
+  # column name
+  in_transit_at
+
+  # column name
+  product_id
+
+  # column name
+  ready_for_shipping_at
+
+  # column name
+  ref
+
+  # column name
+  shipped_at
+
+  # column name
+  shipping_status
+
+  # column name
+  updated_at
+}
+
+# aggregate var_pop on columns
+type orders_var_pop_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by var_pop() on columns of table "orders"
+input orders_var_pop_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# aggregate var_samp on columns
+type orders_var_samp_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by var_samp() on columns of table "orders"
+input orders_var_samp_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# aggregate variance on columns
+type orders_variance_fields {
+  customer_id: Float
+  delivery_id: Float
+  product_id: Float
+}
+
+# order by variance() on columns of table "orders"
+input orders_variance_order_by {
+  customer_id: order_by
+  delivery_id: order_by
+  product_id: order_by
+}
+
+# columns and relationships of "products"
+type products {
+  created_at: timestamp
+  id: Int!
+  label: String
+
+  # An array relationship
+  orders(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): [orders!]!
+
+  # An aggregated array relationship
+  orders_aggregate(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): orders_aggregate!
+  picture: String
+  price: float8
+  updated_at: timestamp
+}
+
+# aggregated selection of "products"
+type products_aggregate {
+  aggregate: products_aggregate_fields
+  nodes: [products!]!
+}
+
+# aggregate fields of "products"
+type products_aggregate_fields {
+  avg: products_avg_fields
+  count(columns: [products_select_column!], distinct: Boolean): Int
+  max: products_max_fields
+  min: products_min_fields
+  stddev: products_stddev_fields
+  stddev_pop: products_stddev_pop_fields
+  stddev_samp: products_stddev_samp_fields
+  sum: products_sum_fields
+  var_pop: products_var_pop_fields
+  var_samp: products_var_samp_fields
+  variance: products_variance_fields
+}
+
+# order by aggregate values of table "products"
+input products_aggregate_order_by {
+  avg: products_avg_order_by
+  count: order_by
+  max: products_max_order_by
+  min: products_min_order_by
+  stddev: products_stddev_order_by
+  stddev_pop: products_stddev_pop_order_by
+  stddev_samp: products_stddev_samp_order_by
+  sum: products_sum_order_by
+  var_pop: products_var_pop_order_by
+  var_samp: products_var_samp_order_by
+  variance: products_variance_order_by
+}
+
+# input type for inserting array relation for remote table "products"
+input products_arr_rel_insert_input {
+  data: [products_insert_input!]!
+  on_conflict: products_on_conflict
+}
+
+# aggregate avg on columns
+type products_avg_fields {
+  id: Float
+  price: Float
+}
+
+# order by avg() on columns of table "products"
+input products_avg_order_by {
+  id: order_by
+  price: order_by
+}
+
+# Boolean expression to filter rows from the table "products". All fields are combined with a logical 'AND'.
+input products_bool_exp {
+  _and: [products_bool_exp]
+  _not: products_bool_exp
+  _or: [products_bool_exp]
+  created_at: timestamp_comparison_exp
+  id: Int_comparison_exp
+  label: String_comparison_exp
+  orders: orders_bool_exp
+  picture: String_comparison_exp
+  price: float8_comparison_exp
+  updated_at: timestamp_comparison_exp
+}
+
+# unique or primary key constraints on table "products"
+enum products_constraint {
+  # unique or primary key constraint
+  products_pkey
+}
+
+# input type for incrementing integer column in table "products"
+input products_inc_input {
+  id: Int
+  price: float8
+}
+
+# input type for inserting data into table "products"
+input products_insert_input {
+  created_at: timestamp
+  id: Int
+  label: String
+  orders: orders_arr_rel_insert_input
+  picture: String
+  price: float8
+  updated_at: timestamp
+}
+
+# aggregate max on columns
+type products_max_fields {
+  created_at: timestamp
+  id: Int
+  label: String
+  picture: String
+  price: float8
+  updated_at: timestamp
+}
+
+# order by max() on columns of table "products"
+input products_max_order_by {
+  created_at: order_by
+  id: order_by
+  label: order_by
+  picture: order_by
+  price: order_by
+  updated_at: order_by
+}
+
+# aggregate min on columns
+type products_min_fields {
+  created_at: timestamp
+  id: Int
+  label: String
+  picture: String
+  price: float8
+  updated_at: timestamp
+}
+
+# order by min() on columns of table "products"
+input products_min_order_by {
+  created_at: order_by
+  id: order_by
+  label: order_by
+  picture: order_by
+  price: order_by
+  updated_at: order_by
+}
+
+# response of any mutation on the table "products"
+type products_mutation_response {
+  # number of affected rows by the mutation
+  affected_rows: Int!
+
+  # data of the affected rows by the mutation
+  returning: [products!]!
+}
+
+# input type for inserting object relation for remote table "products"
+input products_obj_rel_insert_input {
+  data: products_insert_input!
+  on_conflict: products_on_conflict
+}
+
+# on conflict condition type for table "products"
+input products_on_conflict {
+  constraint: products_constraint!
+  update_columns: [products_update_column!]!
+  where: products_bool_exp
+}
+
+# ordering options when selecting data from "products"
+input products_order_by {
+  created_at: order_by
+  id: order_by
+  label: order_by
+  orders_aggregate: orders_aggregate_order_by
+  picture: order_by
+  price: order_by
+  updated_at: order_by
+}
+
+# primary key columns input for table: "products"
+input products_pk_columns_input {
+  id: Int!
+}
+
+# select columns of table "products"
+enum products_select_column {
+  # column name
+  created_at
+
+  # column name
+  id
+
+  # column name
+  label
+
+  # column name
+  picture
+
+  # column name
+  price
+
+  # column name
+  updated_at
+}
+
+# input type for updating data in table "products"
+input products_set_input {
+  created_at: timestamp
+  id: Int
+  label: String
+  picture: String
+  price: float8
+  updated_at: timestamp
+}
+
+# aggregate stddev on columns
+type products_stddev_fields {
+  id: Float
+  price: Float
+}
+
+# order by stddev() on columns of table "products"
+input products_stddev_order_by {
+  id: order_by
+  price: order_by
+}
+
+# aggregate stddev_pop on columns
+type products_stddev_pop_fields {
+  id: Float
+  price: Float
+}
+
+# order by stddev_pop() on columns of table "products"
+input products_stddev_pop_order_by {
+  id: order_by
+  price: order_by
+}
+
+# aggregate stddev_samp on columns
+type products_stddev_samp_fields {
+  id: Float
+  price: Float
+}
+
+# order by stddev_samp() on columns of table "products"
+input products_stddev_samp_order_by {
+  id: order_by
+  price: order_by
+}
+
+# aggregate sum on columns
+type products_sum_fields {
+  id: Int
+  price: float8
+}
+
+# order by sum() on columns of table "products"
+input products_sum_order_by {
+  id: order_by
+  price: order_by
+}
+
+# update columns of table "products"
+enum products_update_column {
+  # column name
+  created_at
+
+  # column name
+  id
+
+  # column name
+  label
+
+  # column name
+  picture
+
+  # column name
+  price
+
+  # column name
+  updated_at
+}
+
+# aggregate var_pop on columns
+type products_var_pop_fields {
+  id: Float
+  price: Float
+}
+
+# order by var_pop() on columns of table "products"
+input products_var_pop_order_by {
+  id: order_by
+  price: order_by
+}
+
+# aggregate var_samp on columns
+type products_var_samp_fields {
+  id: Float
+  price: Float
+}
+
+# order by var_samp() on columns of table "products"
+input products_var_samp_order_by {
+  id: order_by
+  price: order_by
+}
+
+# aggregate variance on columns
+type products_variance_fields {
+  id: Float
+  price: Float
+}
+
+# order by variance() on columns of table "products"
+input products_variance_order_by {
+  id: order_by
+  price: order_by
+}
+
+# query root
+type query_root {
+  # fetch data from the table: "customers"
+  customers(
+    # distinct select on columns
+    distinct_on: [customers_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [customers_order_by!]
+
+    # filter the rows returned
+    where: customers_bool_exp
+  ): [customers!]!
+
+  # fetch aggregated fields from the table: "customers"
+  customers_aggregate(
+    # distinct select on columns
+    distinct_on: [customers_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [customers_order_by!]
+
+    # filter the rows returned
+    where: customers_bool_exp
+  ): customers_aggregate!
+
+  # fetch data from the table: "customers" using primary key columns
+  customers_by_pk(id: Int!): customers
+
+  # fetch data from the table: "deliveries"
+  deliveries(
+    # distinct select on columns
+    distinct_on: [deliveries_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [deliveries_order_by!]
+
+    # filter the rows returned
+    where: deliveries_bool_exp
+  ): [deliveries!]!
+
+  # fetch aggregated fields from the table: "deliveries"
+  deliveries_aggregate(
+    # distinct select on columns
+    distinct_on: [deliveries_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [deliveries_order_by!]
+
+    # filter the rows returned
+    where: deliveries_bool_exp
+  ): deliveries_aggregate!
+
+  # fetch data from the table: "deliveries" using primary key columns
+  deliveries_by_pk(id: Int!): deliveries
+
+  # fetch data from the table: "orders"
+  orders(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): [orders!]!
+
+  # fetch aggregated fields from the table: "orders"
+  orders_aggregate(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): orders_aggregate!
+
+  # fetch data from the table: "orders" using primary key columns
+  orders_by_pk(ref: String!): orders
+
+  # fetch data from the table: "products"
+  products(
+    # distinct select on columns
+    distinct_on: [products_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [products_order_by!]
+
+    # filter the rows returned
+    where: products_bool_exp
+  ): [products!]!
+
+  # fetch aggregated fields from the table: "products"
+  products_aggregate(
+    # distinct select on columns
+    distinct_on: [products_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [products_order_by!]
+
+    # filter the rows returned
+    where: products_bool_exp
+  ): products_aggregate!
+
+  # fetch data from the table: "products" using primary key columns
+  products_by_pk(id: Int!): products
+}
+
+# expression to compare columns of type String. All fields are combined with logical 'AND'.
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+  _ilike: String
+  _in: [String!]
+  _is_null: Boolean
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+  _nilike: String
+  _nin: [String!]
+  _nlike: String
+  _nsimilar: String
+  _similar: String
+}
+
+# subscription root
+type subscription_root {
+  # fetch data from the table: "customers"
+  customers(
+    # distinct select on columns
+    distinct_on: [customers_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [customers_order_by!]
+
+    # filter the rows returned
+    where: customers_bool_exp
+  ): [customers!]!
+
+  # fetch aggregated fields from the table: "customers"
+  customers_aggregate(
+    # distinct select on columns
+    distinct_on: [customers_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [customers_order_by!]
+
+    # filter the rows returned
+    where: customers_bool_exp
+  ): customers_aggregate!
+
+  # fetch data from the table: "customers" using primary key columns
+  customers_by_pk(id: Int!): customers
+
+  # fetch data from the table: "deliveries"
+  deliveries(
+    # distinct select on columns
+    distinct_on: [deliveries_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [deliveries_order_by!]
+
+    # filter the rows returned
+    where: deliveries_bool_exp
+  ): [deliveries!]!
+
+  # fetch aggregated fields from the table: "deliveries"
+  deliveries_aggregate(
+    # distinct select on columns
+    distinct_on: [deliveries_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [deliveries_order_by!]
+
+    # filter the rows returned
+    where: deliveries_bool_exp
+  ): deliveries_aggregate!
+
+  # fetch data from the table: "deliveries" using primary key columns
+  deliveries_by_pk(id: Int!): deliveries
+
+  # fetch data from the table: "orders"
+  orders(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): [orders!]!
+
+  # fetch aggregated fields from the table: "orders"
+  orders_aggregate(
+    # distinct select on columns
+    distinct_on: [orders_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [orders_order_by!]
+
+    # filter the rows returned
+    where: orders_bool_exp
+  ): orders_aggregate!
+
+  # fetch data from the table: "orders" using primary key columns
+  orders_by_pk(ref: String!): orders
+
+  # fetch data from the table: "products"
+  products(
+    # distinct select on columns
+    distinct_on: [products_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [products_order_by!]
+
+    # filter the rows returned
+    where: products_bool_exp
+  ): [products!]!
+
+  # fetch aggregated fields from the table: "products"
+  products_aggregate(
+    # distinct select on columns
+    distinct_on: [products_select_column!]
+
+    # limit the number of rows returned
+    limit: Int
+
+    # skip the first n rows. Use only with order_by
+    offset: Int
+
+    # sort the rows by one or more columns
+    order_by: [products_order_by!]
+
+    # filter the rows returned
+    where: products_bool_exp
+  ): products_aggregate!
+
+  # fetch data from the table: "products" using primary key columns
+  products_by_pk(id: Int!): products
+}
+
+scalar timestamp
+
+# expression to compare columns of type timestamp. All fields are combined with logical 'AND'.
+input timestamp_comparison_exp {
+  _eq: timestamp
+  _gt: timestamp
+  _gte: timestamp
+  _in: [timestamp!]
+  _is_null: Boolean
+  _lt: timestamp
+  _lte: timestamp
+  _neq: timestamp
+  _nin: [timestamp!]
+}
+

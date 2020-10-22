@@ -1,0 +1,14 @@
+{
+  "configurations": [
+  {
+      "name": "Launch server.js via nodemon",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "nodemon",
+      "program": "${workspaceFolder}/server.js",
+      "restart": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+      }
+  ]
+}

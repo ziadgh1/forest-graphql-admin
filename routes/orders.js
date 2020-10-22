@@ -1,60 +1,57 @@
 const express = require('express');
 const { PermissionMiddlewareCreator } = require('forest-express-sequelize');
-const { orders } = require('../models');
+const COLLECTION_NAME = 'orders';
+
+const ForestHasura = require('../services/forest-hasura');
+const forestHasura = new ForestHasura(COLLECTION_NAME, process.env.GRAPHQL_URL, 'ref');
 
 const router = express.Router();
-const permissionMiddlewareCreator = new PermissionMiddlewareCreator('orders');
-
-// This file contains the logic of every route in Forest Admin for the collection orders:
-// - Native routes are already generated but can be extended/overriden - Learn how to extend a route here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/extend-a-route
-// - Smart action routes will need to be added as you create new Smart Actions - Learn how to create a Smart Action here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/actions/create-and-manage-smart-actions
-
-// Create a Order
-router.post('/orders', permissionMiddlewareCreator.create(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#create-a-record
-  next();
-});
-
-// Update a Order
-router.put('/orders/:recordId', permissionMiddlewareCreator.update(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#update-a-record
-  next();
-});
-
-// Delete a Order
-router.delete('/orders/:recordId', permissionMiddlewareCreator.delete(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-record
-  next();
-});
+const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_NAME);
 
 // Get a list of Orders
-router.get('/orders', permissionMiddlewareCreator.list(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-list-of-records
-  next();
-});
-
-// Get a number of Orders
-router.get('/orders/count', permissionMiddlewareCreator.list(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-number-of-records
-  next();
+router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, response, next) => {
+  forestHasura.list(request, response, next);
 });
 
 // Get a Order
-router.get('/orders/:recordId', permissionMiddlewareCreator.details(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-record
-  next();
+router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.details(), (request, response, next) => {
+  forestHasura.details(request, response, next);
 });
 
-// Export a list of Orders
-router.get('/orders.csv', permissionMiddlewareCreator.export(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#export-a-list-of-records
-  next();
+// Update a Record
+router.put(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  forestHasura.update(request, response, next);
 });
 
-// Delete a list of Orders
-router.delete('/orders', permissionMiddlewareCreator.delete(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-list-of-records
-  next();
+// Update the relationship is not needed in the relational context
+router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  response.send({});
 });
+  
+// Delete a Record
+router.delete(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.delete(request, response, next);
+});
+
+// Delete a list of Record
+router.delete(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.deleteBulk(request, response, next);
+});
+
+// Create a Record
+router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (request, response, next) => {
+  forestHasura.create(request, response, next);
+});
+
+// Export a list of Records
+router.get(`/${COLLECTION_NAME}.csv`, permissionMiddlewareCreator.export(), (request, response, next) => {
+  forestHasura.exportList(request, response, next);
+});
+
+// ==> Not Applicable for Smart Collection
+// // Get a number of Orders
+// router.get(`/${COLLECTION_NAME}/count`, permissionMiddlewareCreator.list(), (request, response, next) => {
+//   // next();
+// });
 
 module.exports = router;

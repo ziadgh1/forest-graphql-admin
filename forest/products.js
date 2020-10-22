@@ -6,7 +6,47 @@ const { collection } = require('forest-express-sequelize');
 // - Smart relationships: https://docs.forestadmin.com/documentation/reference-guide/relationships/create-a-smart-relationship
 // - Smart segments: https://docs.forestadmin.com/documentation/reference-guide/segments/smart-segments
 collection('products', {
+  isSearchable: true,
   actions: [],
-  fields: [],
-  segments: [],
+  fields: [  
+  {
+    field: 'id',
+    type: 'Number',
+    isSortable: true,
+  },{
+    field: 'label',
+    type: 'String',
+    isSortable: true,
+  },{
+    field: 'picture',
+    type: 'String',
+    isSortable: true,
+  },{
+    field: 'price',
+    type: 'Number',
+    isSortable: true,
+  },{
+    field: 'created_at',
+    type: 'Date',
+    isSortable: true,
+  },{
+    field: 'updated_at',
+    type: 'Date',
+    isSortable: true,
+  },
+],
+  segments: [
+  {
+    name: 'Products > $3000',
+    where: (product) => {
+      return '{ price: {_gt: "3000"} }';
+    }
+  },
+  {
+    name: 'Products Star Wars',
+    where: (product) => {
+      return '{ label: {_ilike: "%Star Wars%"} }';
+    }
+  },
+  ],
 });

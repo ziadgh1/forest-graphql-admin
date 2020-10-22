@@ -4,14 +4,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: forest_graphql_admin
+    container_name: forest_graphql_v_2
     environment:
       - APPLICATION_PORT=3310
-      - DATABASE_URL=postgres://ziadghalleb@host.docker.internal:5430/postgres
+      - DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/forest-graphql
       - DATABASE_SCHEMA=public
       - DATABASE_SSL=false
-      - FOREST_AUTH_SECRET=2c9d742d1f6c23ee0de4997030402f1ded57a64bffbfb682f2a3aee85ab7303eef712d1403f5e252ddc0b1ad76a47389
-      - FOREST_ENV_SECRET=a5cb760eab4053b52ac1cf664bc5d5c68d3443dcbca2fa69a3a4b67afc635566
+      - FOREST_AUTH_SECRET=b87bd40acf2cff5a084e9da780f7cd7551d82d48d16c55df564bda3cb548baf1f2c536d1969894058c07c94126563b89
+      - FOREST_ENV_SECRET=676beddfd534bbd596a2beab253416a75a1363f3133b40ea7528f75dece0a697
     ports:
       - "3310:3310"
     volumes:

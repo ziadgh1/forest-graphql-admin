@@ -1,60 +1,49 @@
 const express = require('express');
 const { PermissionMiddlewareCreator } = require('forest-express-sequelize');
-const { products } = require('../models');
+const COLLECTION_NAME = 'products';
+
+const ForestHasura = require('../services/forest-hasura');
+const forestHasura = new ForestHasura(COLLECTION_NAME, process.env.GRAPHQL_URL);
 
 const router = express.Router();
-const permissionMiddlewareCreator = new PermissionMiddlewareCreator('products');
+const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_NAME);
 
-// This file contains the logic of every route in Forest Admin for the collection products:
-// - Native routes are already generated but can be extended/overriden - Learn how to extend a route here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/extend-a-route
-// - Smart action routes will need to be added as you create new Smart Actions - Learn how to create a Smart Action here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/actions/create-and-manage-smart-actions
 
-// Create a Product
-router.post('/products', permissionMiddlewareCreator.create(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#create-a-record
-  next();
+// Get a list of Records
+router.get(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.list(), (request, response, next) => {
+  const segment = request.query.segment;
+  forestHasura.list(request, response, next);
 });
 
-// Update a Product
-router.put('/products/:recordId', permissionMiddlewareCreator.update(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#update-a-record
-  next();
+// Get a Record
+router.get(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.list(), (request, response, next) => {
+    forestHasura.details(request, response, next);
 });
 
-// Delete a Product
-router.delete('/products/:recordId', permissionMiddlewareCreator.delete(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-record
-  next();
+// Update a Record
+router.put(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  forestHasura.update(request, response, next);
 });
 
-// Get a list of Products
-router.get('/products', permissionMiddlewareCreator.list(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-list-of-records
-  next();
+// update the relationship is not needed in the relational context
+router.put(`/${COLLECTION_NAME}/:recordId/relationships/:belongsToRelationName`, permissionMiddlewareCreator.update(), (request, response, next) => {
+  response.send({});
 });
 
-// Get a number of Products
-router.get('/products/count', permissionMiddlewareCreator.list(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-number-of-records
-  next();
+  
+// Delete a Record
+router.delete(`/${COLLECTION_NAME}/:recordId`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.delete(request, response, next);
 });
 
-// Get a Product
-router.get('/products/:recordId', permissionMiddlewareCreator.details(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#get-a-record
-  next();
+// Delete a list of Record
+router.delete(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.delete(), (request, response, next) => {
+  forestHasura.deleteBulk(request, response, next);
 });
 
-// Export a list of Products
-router.get('/products.csv', permissionMiddlewareCreator.export(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#export-a-list-of-records
-  next();
-});
-
-// Delete a list of Products
-router.delete('/products', permissionMiddlewareCreator.delete(), (request, response, next) => {
-  // Learn what this route does here: https://docs.forestadmin.com/documentation/v/v6/reference-guide/routes/default-routes#delete-a-list-of-records
-  next();
+// Create a Record
+router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (request, response, next) => {
+  forestHasura.create(request, response, next);
 });
 
 module.exports = router;
