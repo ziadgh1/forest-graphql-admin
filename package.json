@@ -2,6 +2,12 @@
   "name": "forest-graphql-v2",
   "version": "0.0.1",
   "private": true,
+  "eslintConfig": {
+    "env": {
+        "browser": true,
+        "node": true
+    }
+  },
   "scripts": {
     "start": "node ./server.js"
   },
@@ -23,5 +29,10 @@
     "pg": "~8.2.2",
     "require-all": "^3.0.0",
     "sequelize": "~5.15.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.11.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.1"
   }
 }
