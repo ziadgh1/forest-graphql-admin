@@ -1,3 +1,4 @@
+const cookieParser = require('cookie-parser');
 const { RecordSerializer } = require('forest-express-sequelize');
 const Liana = require('forest-express-sequelize');
 const { request, gql } = require('graphql-request');
@@ -205,11 +206,12 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     const recordId = req.params.recordId;
     if (recordId === 'count') return; // bug?
     const selectFields = getDetailsFields(COLLECTION_NAME);
-  
-  
+    
+    const pkCondition = getPkCondition(ID_FIELD, recordId);
+
     const query = gql`
       query details {
-        ${COLLECTION_NAME}_by_pk(${ID_FIELD}: "${recordId}") {
+        ${COLLECTION_NAME}_by_pk(${pkCondition}) {
           ${selectFields}
         }
       }`;
@@ -230,10 +232,11 @@ function ForestHasura(collectionName, graphqlURL, idField) {
     const setValues = JSON5.stringify(attributes, {quote: '"'});
 
     const selectFields = getDetailsFields(COLLECTION_NAME);
-  
+    const pkCondition = getPkCondition(ID_FIELD, recordId);
+
     const query = gql`
       mutation update {
-        update_${COLLECTION_NAME}_by_pk(pk_columns: {${ID_FIELD}: "${recordId}"}, _set: ${setValues}) {
+        update_${COLLECTION_NAME}_by_pk(pk_columns: {${pkCondition}}, _set: ${setValues}) {
           ${selectFields}
         }
       }`;
@@ -271,10 +274,12 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   }
 
   this._deleteRecord = async function (recordId) {
+    const pkCondition = getPkCondition(ID_FIELD, recordId);
+
     const query = gql`
       mutation delete {
-        delete_${COLLECTION_NAME}_by_pk(${ID_FIELD}: "${recordId}") {
-          ${ID_FIELD}
+        delete_${COLLECTION_NAME}_by_pk(${pkCondition}) {
+          ${ID_FIELD.split('|').join(' ')}
         }
       }`;
     
@@ -282,8 +287,8 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   }    
 
   this.create  = async function (req, res, next) {
-    let attributes = req.body.data.attributes;
-    delete attributes['__meta__']; //TODO: why do we get this?
+    let attributes = req.body.data.attributes || {};
+    if (attributes && attributes['__meta__']) delete attributes['__meta__']; //TODO: why do we get this?
     attributes = appendRelationshipsAttributes(attributes, req.body.data.relationships, COLLECTION_NAME);
 
     const createValues = JSON5.stringify(attributes, {quote: '"'});
@@ -302,7 +307,12 @@ function ForestHasura(collectionName, graphqlURL, idField) {
       let record = data[`insert_${COLLECTION_NAME}_one`];
       if (ID_FIELD !== 'id') {
         // id is required to be serialized
-        record.id = record[ID_FIELD];
+        const idComposed = ID_FIELD.split('|');
+        let recordId=record[idComposed[0]];
+        for (let i = 1;i<idComposed.length;i++) {
+          recordId = recordId + '|' + record[idComposed[i]];
+        }
+        record.id = recordId;
       }
       return recordSerializer.serialize(record);
     })
@@ -311,10 +321,17 @@ function ForestHasura(collectionName, graphqlURL, idField) {
   
   }
 
-
-
 }
 
+function getPkCondition(idField, recordId) {
+  const idComposed = idField.split('|');
+  const recordIdComposed = recordId.split('|');
+  let pkCondition = `${idComposed[0]}: "${recordIdComposed[0]}"`;
+  for (let i=1; i<idComposed.length;i++) {
+    pkCondition = pkCondition + ', ' + `${idComposed[i]}: "${recordIdComposed[i]}"`
+  }
+  return pkCondition;
+}
 function appendRelationshipsAttributes(attributes, relationships, collectioName) {
   if (!relationships) return attributes;
   for (const [key, value] of Object.entries(relationships)) {

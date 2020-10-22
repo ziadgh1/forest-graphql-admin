@@ -1,9 +1,9 @@
 const express = require('express');
 const { PermissionMiddlewareCreator } = require('forest-express-sequelize');
-const COLLECTION_NAME = 'products';
+const COLLECTION_NAME = 'customers_files';
 
 const ForestHasura = require('../services/forest-hasura');
-const forestHasura = new ForestHasura(COLLECTION_NAME, process.env.GRAPHQL_URL);
+const forestHasura = new ForestHasura(COLLECTION_NAME, process.env.GRAPHQL_URL, 'customer_id|file_id');
 
 const router = express.Router();
 const permissionMiddlewareCreator = new PermissionMiddlewareCreator(COLLECTION_NAME);

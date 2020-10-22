@@ -1,6 +1,6 @@
 const express = require('express');
 const { PermissionMiddlewareCreator } = require('forest-express-sequelize');
-const COLLECTION_NAME = 'products';
+const COLLECTION_NAME = 'files';
 
 const ForestHasura = require('../services/forest-hasura');
 const forestHasura = new ForestHasura(COLLECTION_NAME, process.env.GRAPHQL_URL);
