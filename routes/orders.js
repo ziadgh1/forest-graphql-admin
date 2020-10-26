@@ -53,4 +53,32 @@ router.post(`/${COLLECTION_NAME}`, permissionMiddlewareCreator.create(), (reques
   forestHasura.create(request, response, next);
 });
 
+function getAll() {
+  this.graphqlQuery = function fn() {
+    const query = gql`
+    query get_all_and_count($limit: Int!, $offset: Int!) {
+      ${COLLECTION_NAME}(limit: $limit, offset: $offset, where: ${whereGraphQL}, order_by: ${orderBy}) {
+        ${queryFields}
+      }
+      ${COLLECTION_NAME}_aggregate(where: ${whereGraphQL}) {
+        aggregate {
+          count
+        }
+      }
+    }`;
+    return query;
+  }
+  
+  this.selectBuilder(fieldsCollection, fieldsBelongsTo) {
+  }
+  
+  this.whereBuilder(search, filter) {
+  
+  }
+  
+  this.orderByBuilder(orderBy) {
+  }
+  
+}
+
 module.exports = router;
