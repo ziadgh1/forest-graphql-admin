@@ -9,11 +9,7 @@ collection('customers', {
       type: 'Number',
       isSortable: true,
     }, {
-      field: 'firstname',
-      type: 'String',
-      isSortable: true,
-    }, {
-      field: 'lastname',
+      field: 'full_name',
       type: 'String',
       isSortable: true,
     }, {
